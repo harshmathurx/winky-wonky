@@ -197,8 +197,22 @@ export function createRotaryColorPicker(options = {}) {
       root.style.setProperty(variable, value);
     });
 
+    const accentHex = palette.colors['--winky-accent-color'];
+    if (accentHex) {
+      const rgb = hexToRgb(accentHex);
+      if (rgb) {
+        root.style.setProperty('--winky-accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+      }
+    }
+
     const event = new CustomEvent('theme-changed', { detail: palette.theme });
     window.dispatchEvent(event);
+  }
+
+  function hexToRgb(hex) {
+    const match = hex.match(/^#?([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})$/i);
+    if (!match) return null;
+    return { r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16) };
   }
 
   const motionListener = onReducedMotionChange(() => {
