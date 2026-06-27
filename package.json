@@ -1,0 +1,53 @@
+{
+  "name": "winky-wonky",
+  "version": "1.0.0",
+  "description": "A whimsical, physics-based, audio-synthesized design system inspired by Wes Anderson and Tim Burton. Wobbly buttons, seesaw sliders, pendulum toggles, slingshot uploads, and more.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Harsh Mathur <harshmathurx@gmail.com>",
+  "homepage": "https://github.com/harshmathurx/winky-wonky",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshmathurx/winky-wonky.git"
+  },
+  "bugs": {
+    "url": "https://github.com/harshmathurx/winky-wonky/issues"
+  },
+  "keywords": [
+    "design-system",
+    "ui-components",
+    "physics",
+    "wobbly",
+    "web-audio",
+    "animation",
+    "wes-anderson",
+    "tim-burton",
+    "vanilla-js",
+    "framework-agnostic",
+    "accessible",
+    "interactive"
+  ],
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./style.css": "./src/style.css",
+    "./components/*": "./src/components/*"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.0.12"
+  }
+}

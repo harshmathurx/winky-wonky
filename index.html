@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winky-Wonky Design System</title>
+  <meta name="description" content="A whimsical, physics-based design system showcase inspired by Wes Anderson and Tim Burton. Wobbles, swings, slides, and clicks.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤪</text></svg>">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Hero Landing Page -->
+  <div class="hero-landing" id="heroLanding">
+    <div class="hero-content">
+      <div class="hero-badge">Physics-Based UI &middot; Web Audio Synth &middot; Accessible</div>
+      <h1 class="hero-title">
+        <span class="hero-title-word wobble-word-1">Winky</span>
+        <span class="hero-title-word wobble-word-2">Wonky</span>
+      </h1>
+      <p class="hero-tagline">
+        UI elements that <em>wobble</em>, <em>dodge</em>, <em>swing</em>, and <em>squeak</em>.<br>
+        A design system inspired by Wes Anderson &amp; Tim Burton.
+      </p>
+
+      <div class="hero-actions">
+        <button class="hero-cta-btn" id="enterPlaygroundBtn">
+          Enter the Playground
+          <span class="hero-cta-arrow">&rarr;</span>
+        </button>
+        <button class="hero-gallery-btn" id="enterGalleryBtn">
+          Show Your Wobbliest Site
+        </button>
+      </div>
+
+      <div class="hero-install-box">
+        <code class="hero-install-code">npm install winky-wonky</code>
+        <button class="hero-copy-btn" id="heroCopyBtn" aria-label="Copy install command">Copy</button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num">18</span><span class="hero-stat-label">Components</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-label">Dependencies</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">Vanilla JS</span></div>
+      </div>
+    </div>
+
+    <div class="hero-preview" aria-hidden="true">
+      <div class="hero-preview-blob blob-1"></div>
+      <div class="hero-preview-blob blob-2"></div>
+      <div class="hero-preview-blob blob-3"></div>
+      <div class="hero-preview-eye">&#9678;</div>
+      <div class="hero-preview-star">&#9733;</div>
+    </div>
+
+    <div class="hero-scroll-hint">scroll down to explore &middot; or click enter</div>
+  </div>
+
+  <!-- Gallery Section -->
+  <div class="gallery-section" id="gallerySection" style="display: none;">
+    <div class="gallery-header">
+      <h2>The Wobbliest Gallery</h2>
+      <p>Sites built with winky-wonky. Submit yours and join the peculiar parade.</p>
+    </div>
+    <div class="gallery-submit-row">
+      <input type="text" id="galleryUrlInput" placeholder="https://your-wonky-site.com" class="gallery-url-input" />
+      <input type="text" id="galleryTitleInput" placeholder="Site title" class="gallery-title-input" />
+      <button id="gallerySubmitBtn" class="gallery-submit-btn">Submit Site</button>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-empty" id="galleryEmpty">No submissions yet. Be the first to wobble!</div>
+    <button class="gallery-back-btn" id="galleryBackBtn">&larr; Back to Landing</button>
+  </div>
+
+  <div class="app-container" id="appContainer" style="display: none;">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <h1 class="brand-title" id="logoText">Winky Wonky</h1>
+        <div class="brand-subtitle">Peculiar UI Elements</div>
+      </div>
+      
+      <nav class="nav-menu">
+        <ul class="nav-links">
+          <li class="nav-item">
+            <button class="nav-btn active" data-tab="tactile" id="tabTactile">Tactile Controls</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tab="dynamic" id="tabDynamic">Dynamic Widgets</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tab="gothic" id="tabGothic">Gothic Extras</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tab="system" id="tabSystem">System UI</button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="philosophy-panel" style="margin-top: 2rem;">
+        <h4>Package Settings</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.6rem; font-size: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="muteToggle" style="font-weight:600;">Mute Sounds</label>
+            <input type="checkbox" id="muteToggle" style="cursor: pointer;" />
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="volumeRange" style="font-weight:600;">Synth Volume</label>
+            <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.15" style="width: 70px; cursor: pointer;" />
+          </div>
+          <hr style="border: none; border-top: 1px dashed var(--winky-border-color); margin: 0.2rem 0; width: 100%;" />
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="accentColorInput" style="font-weight:600;">Accent Color</label>
+            <input type="color" id="accentColorInput" value="#6366F1" style="border: 1px solid var(--winky-border-color); background: none; width: 40px; height: 20px; padding: 0; cursor: pointer; border-radius: 2px;" />
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="bgColorInput" style="font-weight:600;">Background</label>
+            <input type="color" id="bgColorInput" value="#0A0A0F" style="border: 1px solid var(--winky-border-color); background: none; width: 40px; height: 20px; padding: 0; cursor: pointer; border-radius: 2px;" />
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Board -->
+    <main class="main-content">
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="page-header">
+          <h2 id="tabTitle">Tactile Controls</h2>
+        </div>
+        <div class="theme-switch-container">
+          <span class="brand-subtitle" style="font-size: 0.75rem;">Flip Theme</span>
+          <button class="theme-pendulum-btn" id="themeToggleBtn" aria-label="Toggle Theme Pendulum">
+            <div class="pendulum-string"></div>
+            <div class="pendulum-bob" id="pendulumBob">☉</div>
+          </button>
+        </div>
+      </header>
+
+      <!-- Component Playground Grid -->
+      <section class="playground-view" id="playgroundView">
+        <!-- Components will be dynamically updated / rendered depending on selected navigation tab -->
+      </section>
+    </main>
+  </div>
+
+  <!-- Screen Wipe Overlay for transitions -->
+  <div class="theme-wipe-overlay" id="themeWipe"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

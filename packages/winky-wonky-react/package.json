@@ -1,0 +1,41 @@
+{
+  "name": "winky-wonky-react",
+  "version": "1.0.0",
+  "description": "React wrappers for winky-wonky — a whimsical, physics-based, audio-synthesized design system.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Harsh Mathur <harshmathurx@gmail.com>",
+  "homepage": "https://github.com/harshmathurx/winky-wonky",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshmathurx/winky-wonky.git",
+    "directory": "packages/winky-wonky-react"
+  },
+  "keywords": [
+    "react",
+    "design-system",
+    "ui-components",
+    "physics",
+    "wobbly",
+    "web-audio",
+    "animation",
+    "wes-anderson",
+    "tim-burton",
+    "accessible"
+  ],
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17",
+    "winky-wonky": ">=1.0.0"
+  },
+  "sideEffects": false
+}
