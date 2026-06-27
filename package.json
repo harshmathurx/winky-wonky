@@ -29,13 +29,20 @@
   ],
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "unpkg": "./dist/winky-wonky.min.js",
+  "jsdelivr": "./dist/winky-wonky.min.js",
   "exports": {
     ".": "./src/index.js",
     "./style.css": "./src/style.css",
+    "./dist/*": "./dist/*",
     "./components/*": "./src/components/*"
   },
   "files": [
-    "src",
+    "src/index.js",
+    "src/style.css",
+    "src/components",
+    "dist/winky-wonky.min.js",
+    "dist/winky-wonky.css",
     "README.md",
     "LICENSE"
   ],
@@ -45,6 +52,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lib": "vite build --config vite.lib.config.js",
+    "prepublishOnly": "npm run build:lib",
     "preview": "vite preview"
   },
   "devDependencies": {
