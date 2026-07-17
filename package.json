@@ -54,9 +54,12 @@
     "build": "vite build",
     "build:lib": "vite build --config vite.lib.config.js",
     "prepublishOnly": "npm run build:lib",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "vite": "^8.0.12"
+    "jsdom": "^29.1.1",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-build:
+    name: Test & build (winky-wonky)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build (playground)
+        run: npm run build
+
+      - name: Build (library)
+        run: npm run build:lib
+
+  react-package-build:
+    name: Build (winky-wonky-react)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: packages/winky-wonky-react/package-lock.json
+
+      - name: Install dependencies
+        working-directory: packages/winky-wonky-react
+        run: npm ci
+
+      - name: Build
+        working-directory: packages/winky-wonky-react
+        run: npm run build
+
+      - name: Verify built output has no JSX syntax
+        working-directory: packages/winky-wonky-react
+        run: node --check dist/index.js

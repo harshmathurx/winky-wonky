@@ -31,13 +31,13 @@
 
 **Goal:** know the current state runs, and have a test harness before touching code.
 
-- [ ] Verify `npm install`, `npm run dev`, `npm run build`, and `npm run build:lib`
+- [x] Verify `npm install`, `npm run dev`, `npm run build`, and `npm run build:lib`
       all succeed. Record any failures before changing anything.
-- [ ] Add `vitest` + `jsdom` as devDependencies; add `"test": "vitest run"` script.
-- [ ] Write smoke tests: import every export from `src/index.js` in a jsdom
+- [x] Add `vitest` + `jsdom` as devDependencies; add `"test": "vitest run"` script.
+- [x] Write smoke tests: import every export from `src/index.js` in a jsdom
       environment, call each `create*` factory, assert it returns a DOM node, and
       call `destroy()` if present. This locks in "nothing crashes on create/destroy."
-- [ ] Add GitHub Actions workflow (`.github/workflows/ci.yml`): install, test,
+- [x] Add GitHub Actions workflow (`.github/workflows/ci.yml`): install, test,
       build, build:lib on push/PR.
 
 **Verify:** `npm test` green; CI file lints (`act` optional, not required).
