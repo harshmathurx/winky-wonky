@@ -49,35 +49,50 @@
 **Goal:** the library can be imported anywhere and doesn't burn CPU at idle.
 
 ### 1a. SSR-safe imports (audit #2)
-- [ ] `src/components/utils.js:1-3` — replace module-level `window.matchMedia`
+- [x] `src/components/utils.js:1-3` — replace module-level `window.matchMedia`
       calls with lazy getters (init on first call, guard `typeof window`).
-- [ ] `src/components/audioSynth.js:33-34` — move the `document.addEventListener`
+- [x] `src/components/audioSynth.js:33-34` — move the `document.addEventListener`
       prime-audio hooks into a lazy init (first `AudioSynth` method call or an
       explicit `AudioSynth.init()` invoked by factories).
-- [ ] Sweep every file in `src/components/` for other module-level `window`/
+- [x] Sweep every file in `src/components/` for other module-level `window`/
       `document`/`matchMedia` access. `grep -n "^\s*\(window\|document\)\." src/components/*.js` is a start, but read each file's top level.
-- [ ] Test: a Node (non-jsdom) vitest environment can
+      (Result: only utils.js/audioSynth.js had real module-level access; all
+      other `document.`/`window.` hits in the sweep were inside
+      `getCodeSnippet()` template-literal strings, not live code.)
+- [x] Test: a Node (non-jsdom) vitest environment can
       `import('./src/index.js')` without throwing.
 
 ### 1b. rAF idle + onChange discipline (audit #3)
-- [ ] `src/components/tiltSlider.js` — `needsRender` must reset to `false` after
+- [x] `src/components/tiltSlider.js` — `needsRender` must reset to `false` after
       render; the rAF loop must stop entirely when settled (no drag, |angle| below
       threshold, value at target) and restart on interaction; `onChange` fires only
       when `Math.round(value)` actually changes, and never double-fires during drag
       (currently fires from both `updateRender` and `onMove`).
-- [ ] Audit every other component with a `requestAnimationFrame` loop
+- [x] Audit every other component with a `requestAnimationFrame` loop
       (`grep -ln requestAnimationFrame src/components/*.js`) and apply the same
       pattern: loops idle when settled, restart on interaction, cancel in `destroy`.
-- [ ] Test: after creating a tiltSlider and dispatching no events, `onChange` is
+      (Result: only `tiltSlider.js` had a true permanent loop. `ratingStars.js`'s
+      confetti rAF already self-terminates when particles die and is cancelled in
+      `destroy`. `magneticNav.js`/`wobblyRadioGroup.js`/`springyTabs.js`/
+      `grumpyModal.js` only use a single one-shot `requestAnimationFrame` on
+      init/open, not a loop — no change needed. `drunkLoader.js` runs a
+      continuous rAF loop by design (it's an indeterminate loading spinner —
+      "always visible and moving" IS its idle/settled state, there's no
+      interaction to restart on); left unchanged but it already cancels
+      correctly in `destroy`. See final report for full rationale.)
+- [x] Test: after creating a tiltSlider and dispatching no events, `onChange` is
       not called; after one keyboard step, it is called exactly once.
 
 ### 1c. Compile the React package (audit #1)
-- [ ] `packages/winky-wonky-react/` currently ships raw JSX. Add a build
+- [x] `packages/winky-wonky-react/` currently ships raw JSX. Add a build
       (vite lib mode or esbuild) that emits plain ESM JS to `dist/`; point
       `main`/`module`/`exports` at the built output; add `prepublishOnly`.
-- [ ] Keep `react`, `react-dom`, `winky-wonky` as peerDependencies.
-- [ ] Test: `node -e "import('...dist/index.js')"` parses (no JSX syntax errors);
+- [x] Keep `react`, `react-dom`, `winky-wonky` as peerDependencies.
+- [x] Test: `node -e "import('...dist/index.js')"` parses (no JSX syntax errors);
       ideally a tiny vitest + @testing-library/react render test for one wrapper.
+      (Verified with `node --check dist/index.js` plus a manual `import()` smoke
+      check — see final report. A vitest + @testing-library/react render test
+      was not added; flagged as a gap for Phase 2/3's agent.)
 
 **Verify:** Phase 0 smoke tests still green + the three new test groups above.
 

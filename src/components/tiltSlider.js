@@ -56,6 +56,23 @@ export function createTiltSlider(options = {}) {
     track.setAttribute('aria-valuetext', `${v}%`);
   }
 
+  let lastEmittedValue = Math.round(value);
+  function emitChange(v) {
+    const rounded = Math.round(v);
+    if (rounded === lastEmittedValue) return;
+    lastEmittedValue = rounded;
+    if (onChange) onChange(rounded);
+  }
+
+  // True while the physics still needs to move on its own (gravity pulling
+  // the value back, or the drag spring lagging toward its target) — i.e.
+  // frames the loop must keep producing even without new interaction events.
+  function isPhysicsActive() {
+    if (isDragging) return true;
+    if (!reducedMotion && Math.abs(angle) > 0.5) return true;
+    return false;
+  }
+
   function updateRender() {
     if (!isDragging && Math.abs(angle) > 0.5 && !reducedMotion) {
       const gravityForce = Math.sin(angle * Math.PI / 180) * gravity * 15;
@@ -75,9 +92,7 @@ export function createTiltSlider(options = {}) {
       track.style.transform = `rotate(${angle}deg)`;
     }
 
-    if (onChange && !isDragging) {
-      onChange(displayVal);
-    }
+    emitChange(value);
     updateAria();
 
     if (activeSlideSound && Math.abs(targetValue - value) > 0.05) {
@@ -86,14 +101,30 @@ export function createTiltSlider(options = {}) {
     }
   }
 
-  let needsRender = true;
-  function loop() {
-    if (needsRender || isDragging || (!reducedMotion && Math.abs(angle) > 0.5)) {
-      updateRender();
+  let animId = null;
+  let needsRender = false;
+
+  function frame() {
+    animId = null;
+    updateRender();
+    needsRender = false;
+    if (isPhysicsActive() || needsRender) {
+      scheduleFrame();
     }
-    animId = requestAnimationFrame(loop);
   }
-  let animId = requestAnimationFrame(loop);
+
+  function scheduleFrame() {
+    if (animId != null) return;
+    animId = requestAnimationFrame(frame);
+  }
+
+  function requestRender() {
+    needsRender = true;
+    scheduleFrame();
+  }
+
+  // Paint the initial state once, then idle until interaction.
+  requestRender();
 
   function handleTiltMove(e) {
     if (isDragging || reducedMotion) return;
@@ -102,7 +133,7 @@ export function createTiltSlider(options = {}) {
     const centerX = rect.width / 2;
     const percent = (mouseX - centerX) / centerX;
     angle = percent * maxTilt;
-    needsRender = true;
+    requestRender();
 
     if (!activeSlideSound) {
       activeSlideSound = AudioSynth.startSlide();
@@ -112,7 +143,7 @@ export function createTiltSlider(options = {}) {
   function resetTilt() {
     if (isDragging) return;
     angle = 0;
-    needsRender = true;
+    requestRender();
     if (activeSlideSound) {
       activeSlideSound.stop();
       activeSlideSound = null;
@@ -127,7 +158,7 @@ export function createTiltSlider(options = {}) {
       isDragging = true;
       e.stopPropagation();
       angle = 0;
-      needsRender = true;
+      requestRender();
       if (!activeSlideSound) {
         activeSlideSound = AudioSynth.startSlide();
       }
@@ -137,11 +168,11 @@ export function createTiltSlider(options = {}) {
       const mouseX = e.clientX - rect.left;
       const pct = Math.max(0, Math.min(100, (mouseX / rect.width) * 100));
       targetValue = pct;
-      needsRender = true;
-      if (onChange) onChange(Math.round(targetValue));
+      requestRender();
     },
     onUp() {
       isDragging = false;
+      requestRender();
       if (activeSlideSound) {
         activeSlideSound.stop();
         activeSlideSound = null;
@@ -173,9 +204,8 @@ export function createTiltSlider(options = {}) {
 
     if (stepped) {
       e.preventDefault();
-      needsRender = true;
       AudioSynth.playTick();
-      if (onChange) onChange(Math.round(value));
+      requestRender();
     }
   });
 
@@ -185,10 +215,11 @@ export function createTiltSlider(options = {}) {
       angle = 0;
       track.style.transform = 'none';
     }
+    requestRender();
   });
 
   wrapper.destroy = () => {
-    cancelAnimationFrame(animId);
+    if (animId != null) cancelAnimationFrame(animId);
     if (activeSlideSound) activeSlideSound.stop();
     track.removeEventListener('pointermove', handleTiltMove);
     track.removeEventListener('pointerleave', resetTilt);

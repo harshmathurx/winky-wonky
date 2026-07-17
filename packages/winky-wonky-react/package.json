@@ -23,19 +23,30 @@
     "tim-burton",
     "accessible"
   ],
-  "main": "./index.js",
-  "module": "./index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "exports": {
-    ".": "./index.js"
+    ".": "./dist/index.js"
   },
   "files": [
-    "index.js",
+    "dist",
     "README.md"
   ],
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "npm run build"
+  },
   "peerDependencies": {
     "react": ">=17",
     "react-dom": ">=17",
     "winky-wonky": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^7.0.0",
+    "winky-wonky": "file:../.."
   },
   "sideEffects": false
 }

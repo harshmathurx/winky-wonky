@@ -1,22 +1,48 @@
-const reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-const reducedSoundMQ = window.matchMedia('(prefers-reduced-sound: reduce)');
-const coarsePointerMQ = window.matchMedia('(pointer: coarse)');
+function hasMatchMedia() {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+}
 
-export const prefersReducedMotion = () => reducedMotionMQ.matches;
-export const prefersReducedSound = () => reducedSoundMQ.matches;
-export const isCoarsePointer = () => coarsePointerMQ.matches;
+let reducedMotionMQ = null;
+let reducedSoundMQ = null;
+let coarsePointerMQ = null;
+
+function getReducedMotionMQ() {
+  if (!hasMatchMedia()) return null;
+  if (!reducedMotionMQ) reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  return reducedMotionMQ;
+}
+function getReducedSoundMQ() {
+  if (!hasMatchMedia()) return null;
+  if (!reducedSoundMQ) reducedSoundMQ = window.matchMedia('(prefers-reduced-sound: reduce)');
+  return reducedSoundMQ;
+}
+function getCoarsePointerMQ() {
+  if (!hasMatchMedia()) return null;
+  if (!coarsePointerMQ) coarsePointerMQ = window.matchMedia('(pointer: coarse)');
+  return coarsePointerMQ;
+}
+
+export const prefersReducedMotion = () => getReducedMotionMQ()?.matches ?? false;
+export const prefersReducedSound = () => getReducedSoundMQ()?.matches ?? false;
+export const isCoarsePointer = () => getCoarsePointerMQ()?.matches ?? false;
 
 export const onReducedMotionChange = (cb) => {
-  reducedMotionMQ.addEventListener('change', cb);
-  return () => reducedMotionMQ.removeEventListener('change', cb);
+  const mq = getReducedMotionMQ();
+  if (!mq) return () => {};
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
 };
 export const onReducedSoundChange = (cb) => {
-  reducedSoundMQ.addEventListener('change', cb);
-  return () => reducedSoundMQ.removeEventListener('change', cb);
+  const mq = getReducedSoundMQ();
+  if (!mq) return () => {};
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
 };
 export const onPointerTypeChange = (cb) => {
-  coarsePointerMQ.addEventListener('change', cb);
-  return () => coarsePointerMQ.removeEventListener('change', cb);
+  const mq = getCoarsePointerMQ();
+  if (!mq) return () => {};
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
 };
 
 export const shouldPlaySound = () => !prefersReducedSound();

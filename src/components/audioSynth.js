@@ -5,6 +5,7 @@ let masterGainNode = null;
 let masterVolume = 0.15;
 let isMuted = false;
 let userInteracted = false;
+let primeListenersAttached = false;
 
 function getAudioContext() {
   if (!audioCtx) {
@@ -20,6 +21,7 @@ function getAudioContext() {
 }
 
 function canActivate() {
+  ensurePrimeListeners();
   return userInteracted && !isMuted && shouldPlaySound();
 }
 
@@ -30,11 +32,26 @@ function primeAudio() {
   }
 }
 
-document.addEventListener('pointerdown', primeAudio, { once: true });
-document.addEventListener('keydown', primeAudio, { once: true });
+function ensurePrimeListeners() {
+  if (primeListenersAttached) return;
+  if (typeof document === 'undefined') return;
+  primeListenersAttached = true;
+  document.addEventListener('pointerdown', primeAudio, { once: true });
+  document.addEventListener('keydown', primeAudio, { once: true });
+}
 
 export const AudioSynth = {
+  /**
+   * Explicitly attaches the gesture-priming listeners. Safe to call multiple
+   * times and safe to call outside a browser (no-op). Also called lazily by
+   * every other AudioSynth method on first use.
+   */
+  init() {
+    ensurePrimeListeners();
+  },
+
   setVolume(level) {
+    ensurePrimeListeners();
     try {
       const ctx = getAudioContext();
       masterVolume = Math.max(0, Math.min(1.0, level));
@@ -49,6 +66,7 @@ export const AudioSynth = {
   },
 
   mute() {
+    ensurePrimeListeners();
     try {
       const ctx = getAudioContext();
       isMuted = true;
@@ -57,6 +75,7 @@ export const AudioSynth = {
   },
 
   unmute() {
+    ensurePrimeListeners();
     try {
       const ctx = getAudioContext();
       isMuted = false;
