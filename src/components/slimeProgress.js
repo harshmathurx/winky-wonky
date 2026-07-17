@@ -1,6 +1,34 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SlimeProgressOptions
+ * @property {number} [initialProgress=35] - Starting progress, 0-100.
+ * @property {number} [meltDuration=1.5] - Drip animation duration in seconds
+ *   when "melting" progress back down.
+ * @property {string} [ariaLabel='Slime progress bar'] - Accessible name for
+ *   the progressbar.
+ * @property {(remainingProgress: number) => void} [onMeltComplete] - Called
+ *   once all melt drips finish animating, with the progress value the melt
+ *   started at (or `0` when melted via `setValue`/reduced motion).
+ */
+
+/**
+ * @typedef {Object} SlimeProgressInstance
+ * @property {HTMLElement} el - Root element (track + refill/melt buttons); append this to the DOM.
+ * @property {() => number} getValue - Current rounded progress (0-100).
+ * @property {(value: number) => void} setValue - Programmatically sets
+ *   progress. Updates the DOM and ARIA state; does NOT invoke `onMeltComplete`.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{meltDuration: number}} config - Live-mutable secondary knob,
+ *   read whenever a new melt starts.
+ */
+
+/**
+ * Creates a progress bar that "melts" (drips) down instead of just shrinking.
+ * @param {SlimeProgressOptions} [options]
+ * @returns {SlimeProgressInstance}
+ */
 export function createSlimeProgress(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-slime-progress-container';

@@ -1,6 +1,29 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, trapFocus, onKeyActivation, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} GrumpyModalOptions
+ * @property {string} [headerText='Peculiar Notice!'] - Modal title.
+ * @property {string} [bodyText] - Modal body copy.
+ * @property {string} [buttonText='Dismiss Me'] - Text on the only button
+ *   that actually closes the modal.
+ * @property {() => void} [onClose] - Called after the modal finishes closing.
+ */
+
+/**
+ * @typedef {Object} GrumpyModalInstance
+ * @property {HTMLButtonElement} el - The trigger button; append this to the DOM.
+ *   The modal overlay itself is appended to `document.body` only while open.
+ * @property {() => void} destroy - Closes the modal if open and removes listeners.
+ */
+
+/**
+ * Creates a trigger button for a modal that refuses to be dismissed by
+ * clicking outside or pressing Escape — it shakes ("throws a tantrum")
+ * instead, and can only be closed via its own button.
+ * @param {GrumpyModalOptions} [options]
+ * @returns {GrumpyModalInstance}
+ */
 export function createGrumpyModalTrigger(options = {}) {
   const triggerBtn = document.createElement('button');
   triggerBtn.className = 'winky-mischievous-btn winky-focus-visible';

@@ -269,15 +269,48 @@ final report's gotchas for Agent 3/the human owner.)
 
 **Goal:** autocomplete for consumers without a TypeScript rewrite.
 
-- [ ] Add JSDoc typedefs to every factory's options and instance return type in
+- [x] Add JSDoc typedefs to every factory's options and instance return type in
       `src/components/*.js` (options object shape, defaults, callbacks).
-- [ ] Generate `.d.ts` via `tsc --allowJs --declaration --emitDeclarationOnly`
+      (Result: 13 of 24 components already had typedefs from earlier phases;
+      the remaining 12 — balloonTooltip, drunkLoader, grumpyModal, hingeDropdown,
+      magneticButton, mischievousButton, rotaryColorPicker, slimeProgress,
+      slingshotUpload, suspiciousEyes, typewriterInput, wobblySwitch — got
+      `<Name>Options`/`<Name>Instance` typedefs matching the established style.
+      `utils.js`'s `addPointerDrag` also got a `PointerDragHandlers` typedef
+      (needed for `tsc --checkJs` to accept its call sites elsewhere).
+      `utils.js`/`audioSynth.js` themselves were left minimally-typed here
+      since Phase 5 moves and re-types them as part of `@winky/core`.)
+- [x] Generate `.d.ts` via `tsc --allowJs --declaration --emitDeclarationOnly`
       (add a `typecheck`/`types` script); add `"types"` field to `package.json`
       exports for both packages.
-- [ ] Add the type build to CI and to `prepublishOnly`.
+      (Result: `typescript@7.0.2` added as a devDependency to both packages;
+      root `tsconfig.json` (`allowJs`, `checkJs: true`, `outDir: dist/types`)
+      and `packages/winky-wonky-react/tsconfig.json` (`jsx: react-jsx`,
+      `checkJs: false` — JSX prop shapes aren't annotated) each get a `types`
+      script (`tsc -p tsconfig.json`). Both `package.json`s' `exports["."]`
+      gained a `types` condition pointing at `dist/types/index.d.ts`
+      (root) / `dist/types/index.d.ts` (react, resolving root's types
+      through the `winky-wonky` package's own `types` export condition —
+      confirmed working end-to-end). Fixed 5 real `checkJs` findings surfaced
+      along the way: 4 `element.dataset.index = <number>` assignments
+      (DOMStringMap wants strings; harmless at runtime since JS coerces, but
+      made explicit with `String(...)`) and one `window.webkitAudioContext`
+      access needing an explicit cast (no official DOM typing for the
+      vendor-prefixed constructor).)
+- [x] Add the type build to CI and to `prepublishOnly`.
+      (Result: both CI jobs (`test-and-build`, `react-package-build`) gained a
+      "Generate type declarations" step running `npm run types`. Both
+      packages' `prepublishOnly` now run `build:lib && types` / `build &&
+      types` in that order — the Vite build empties `dist/`, so type
+      generation must come after it, not before.)
 
 **Verify:** `npm run types` emits declarations with no errors; a scratch `.ts` file
 importing `createTiltSlider` type-checks with correct option hints.
+(Confirmed both. A scratch file importing `createTiltSlider` from the
+generated `dist/types/index.d.ts`, calling it with valid options, asserting
+`el`/`getValue`/`setValue`/`destroy` shapes, and using `@ts-expect-error` on a
+bogus option name type-checked exactly as expected under `tsc --strict
+--noEmit`; deleted after verification since it isn't shipped product code.)
 
 ---
 

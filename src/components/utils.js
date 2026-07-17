@@ -110,6 +110,25 @@ export function trapFocus(container) {
   };
 }
 
+/**
+ * @typedef {Object} PointerDragHandlers
+ * @property {(e: PointerEvent) => void} [onDown] - Called on `pointerdown` on `target`.
+ * @property {(e: PointerEvent) => void} [onMove] - Called on `pointermove` on
+ *   `captureElement` while dragging.
+ * @property {(e: PointerEvent) => void} [onUp] - Called on `pointerup`/`pointercancel`
+ *   on `captureElement`.
+ * @property {EventTarget} [captureElement=window] - Element that move/up
+ *   listeners are attached to (lets dragging continue outside `target`).
+ */
+
+/**
+ * Wires up a drag gesture: `pointerdown` on `target` starts tracking,
+ * `pointermove`/`pointerup`/`pointercancel` on `captureElement` (default
+ * `window`) continue/end it.
+ * @param {EventTarget} target
+ * @param {PointerDragHandlers} [handlers]
+ * @returns {() => void} Teardown function that removes all listeners.
+ */
 export function addPointerDrag(target, {
   onDown,
   onMove,

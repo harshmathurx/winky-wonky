@@ -1,6 +1,42 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} MischievousButtonsOptions
+ * @property {number} [dodgePower=0.8] - How aggressively the dodge button
+ *   flees the cursor.
+ * @property {number} [maxDodgeRange=75] - Pointer distance in px within
+ *   which the dodge button starts fleeing.
+ * @property {boolean} [isDodgeEnabled=true] - Whether the dodge button
+ *   flees at all; exposed live as `config.dodgeEnabled`.
+ * @property {string} [dodgeAriaLabel='Dodge button — try to catch it'] -
+ *   Accessible name for the dodge button.
+ * @property {string} [squashAriaLabel='Squash and stretch button'] -
+ *   Accessible name for the squash button.
+ * @property {string} [lazyAriaLabel='Tactile button with lazy shadow'] -
+ *   Accessible name for the lazy-shadow button.
+ * @property {(kind: 'dodge'|'squash'|'lazy-shadow') => void} [onClick] -
+ *   Called with which of the three buttons was clicked.
+ */
+
+/**
+ * @typedef {Object} MischievousButtonsInstance
+ * @property {HTMLElement} el - Root grid element containing all three
+ *   buttons; append this to the DOM.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{dodgePower: number, maxDodgeRange: number, dodgeEnabled: boolean}} config -
+ *   Live-mutable secondary knobs; prefer `setOptions` for `dodgeEnabled`
+ *   changes so the dodge offset resets cleanly.
+ * @property {(partial: {dodgeEnabled?: boolean, dodgePower?: number, maxDodgeRange?: number}) => void} setOptions -
+ *   Updates the dodge-button knobs.
+ */
+
+/**
+ * Creates a trio of playful buttons: one that dodges the cursor, one with a
+ * squash-and-stretch click animation, and one with a lazy chasing shadow.
+ * @param {MischievousButtonsOptions} [options]
+ * @returns {MischievousButtonsInstance}
+ */
 export function createMischievousButtons(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-button-grid';

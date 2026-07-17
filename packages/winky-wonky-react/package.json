@@ -25,8 +25,12 @@
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
     "dist",
@@ -34,8 +38,9 @@
   ],
   "scripts": {
     "build": "vite build",
+    "types": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm run types"
   },
   "peerDependencies": {
     "react": ">=17",
@@ -49,6 +54,7 @@
     "jsdom": "^29.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "typescript": "^7.0.2",
     "vite": "^7.0.0",
     "vitest": "^4.1.10",
     "winky-wonky": "file:../.."

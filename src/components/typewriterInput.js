@@ -1,6 +1,35 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} TypewriterInputOptions
+ * @property {string} [placeholder='Type something peculiar...'] - Input placeholder text.
+ * @property {string} [ariaLabel='Typewriter input'] - Accessible name for the input.
+ * @property {number} [jitterStrength=3] - Max px/deg of the input's jitter
+ *   on each keystroke.
+ * @property {number} [maxWobbleRotation=12] - Max degrees of rotation for
+ *   each character "projected" onto the board above the input.
+ * @property {(value: string) => void} [onChange] - Called with the input's
+ *   current text on every keystroke.
+ */
+
+/**
+ * @typedef {Object} TypewriterInputInstance
+ * @property {HTMLElement} el - Root element (projection board + input); append this to the DOM.
+ * @property {() => string} getValue - Current input text.
+ * @property {(value: string) => void} setValue - Sets the input text and
+ *   re-renders the projection board. Does NOT invoke `onChange`.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{jitterStrength: number, maxWobbleRotation: number}} config -
+ *   Live-mutable knobs, read on every keystroke.
+ */
+
+/**
+ * Creates a text input whose keystrokes jitter the field and "project" each
+ * typed character, wobbling, onto a board above it.
+ * @param {TypewriterInputOptions} [options]
+ * @returns {TypewriterInputInstance}
+ */
 export function createTypewriterInput(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-typewriter-wrapper';

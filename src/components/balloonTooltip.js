@@ -1,6 +1,30 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} BalloonTooltipOptions
+ * @property {HTMLElement} [triggerNode] - Existing element to use as the
+ *   hover/focus trigger. When omitted, a default button is created.
+ * @property {string} [text='Curiosity Box!'] - Tooltip body text.
+ * @property {number} [stringLength=25] - Length in px of the balloon's
+ *   string, which also controls the tooltip's vertical offset.
+ */
+
+/**
+ * @typedef {Object} BalloonTooltipInstance
+ * @property {HTMLElement} el - Root element (trigger + tooltip); append this to the DOM.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{stringLength: number, text: string}} config - Live-mutable
+ *   secondary knobs; prefer `setOptions` for changes that need re-rendering.
+ * @property {(partial: {stringLength?: number, text?: string}) => void} setOptions -
+ *   Updates the string length and/or text, re-rendering as needed.
+ */
+
+/**
+ * Creates a hover/focus tooltip styled as a balloon on a string.
+ * @param {BalloonTooltipOptions} [options]
+ * @returns {BalloonTooltipInstance}
+ */
 export function createBalloonTooltip(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-tooltip-target-wrapper';

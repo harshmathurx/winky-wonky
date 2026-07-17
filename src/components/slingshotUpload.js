@@ -1,6 +1,32 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SlingshotUploadOptions
+ * @property {string} [ariaLabel='Upload file by dragging or clicking'] -
+ *   Accessible name for the drop zone.
+ * @property {number} [bandWidth=4] - Slingshot band stroke width in px.
+ * @property {number} [launchSpeed=0.65] - Launch animation duration in seconds.
+ */
+
+/**
+ * @typedef {Object} SlingshotUploadInstance
+ * @property {HTMLElement} el - Root drop-zone element (also a hidden
+ *   `<input type="file">` for the click-to-upload fallback); append this to the DOM.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{bandWidth: number, launchSpeed: number}} config - Live-mutable
+ *   secondary knobs; prefer `setOptions` for changes that need re-rendering.
+ * @property {(partial: {bandWidth?: number, launchSpeed?: number}) => void} setOptions -
+ *   Updates the band width and/or launch speed.
+ */
+
+/**
+ * Creates a drag-and-drop (or click-to-upload) file target styled as a
+ * slingshot: dragging over it stretches the band, dropping/selecting a
+ * file launches an icon.
+ * @param {SlingshotUploadOptions} [options]
+ * @returns {SlingshotUploadInstance}
+ */
 export function createSlingshotUpload(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-slingshot-container';

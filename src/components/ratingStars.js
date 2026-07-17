@@ -72,7 +72,7 @@ export function createRatingStars(options = {}) {
     star.setAttribute('aria-checked', rating === i ? 'true' : 'false');
     star.setAttribute('aria-label', starLabel(i));
     star.tabIndex = 0;
-    star.dataset.index = i;
+    star.dataset.index = String(i);
     starRow.appendChild(star);
     stars.push(star);
 

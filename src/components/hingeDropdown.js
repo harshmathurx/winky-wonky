@@ -1,6 +1,39 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, makeFocusable } from './utils.js';
 
+/**
+ * @typedef {Object} HingeDropdownOptions
+ * @property {string} [label='Select Curiosity'] - Initial trigger label,
+ *   shown until an option is selected.
+ * @property {string[]} [options] - Menu option strings.
+ * @property {string} [ariaLabel] - Accessible name for the trigger button;
+ *   defaults to the initial `label`.
+ * @property {string} [hingeOrigin='top left'] - CSS `transform-origin` for
+ *   the swing-open animation.
+ * @property {number} [swingSpeed=1.8] - Swing-open animation duration, seconds.
+ * @property {(value: string) => void} [onSelect] - Called with the selected
+ *   option text.
+ */
+
+/**
+ * @typedef {Object} HingeDropdownInstance
+ * @property {HTMLElement} el - Root element (trigger + menu); append this to the DOM.
+ * @property {() => string} getValue - Current trigger label text.
+ * @property {(value: string) => void} setValue - Sets the trigger label
+ *   directly and closes the menu if open. Does NOT invoke `onSelect`.
+ * @property {() => void} destroy - Removes the outside-click listener.
+ * @property {{hingeOrigin: string, swingSpeed: number}} config - Live-mutable
+ *   secondary knobs; prefer `setOptions` for changes that need re-rendering.
+ * @property {(partial: {hingeOrigin?: string, swingSpeed?: number}) => void} setOptions -
+ *   Updates the hinge origin and/or swing speed, reopening the menu if it
+ *   was open and the origin changed.
+ */
+
+/**
+ * Creates a dropdown menu that swings open like a hinged lid.
+ * @param {HingeDropdownOptions} [options]
+ * @returns {HingeDropdownInstance}
+ */
 export function createHingeDropdown(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-hinge-dropdown-container';
@@ -35,7 +68,7 @@ export function createHingeDropdown(options = {}) {
     item.setAttribute('role', 'option');
     item.textContent = optText;
     item.tabIndex = -1;
-    item.dataset.index = idx;
+    item.dataset.index = String(idx);
     menu.appendChild(item);
     optionItems.push(item);
 

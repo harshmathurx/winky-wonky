@@ -1,6 +1,33 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SuspiciousEyesOptions
+ * @property {string} [inputAriaLabel='Secret passcode'] - Accessible name
+ *   for the password input.
+ * @property {string} [revealAriaLabel='Reveal passcode'] - Accessible name
+ *   for the show/hide toggle button.
+ * @property {number} [trackingSensitivity=7] - Max px the pupils travel
+ *   toward the tracked point.
+ * @property {number} [shockDuration=1500] - How long (ms) the eyes stay
+ *   "shocked" after the password is revealed.
+ */
+
+/**
+ * @typedef {Object} SuspiciousEyesInstance
+ * @property {HTMLElement} el - Root element (eyes + password input row); append this to the DOM.
+ * @property {() => void} destroy - Removes the window-level pointermove
+ *   listener and the reduced-motion listener.
+ * @property {{trackingSensitivity: number, shockDuration: number}} config -
+ *   Live-mutable knobs, read on every look/reveal.
+ */
+
+/**
+ * Creates a password input with a pair of eyes that track the cursor (or
+ * the caret while focused) and look "shocked" when the password is revealed.
+ * @param {SuspiciousEyesOptions} [options]
+ * @returns {SuspiciousEyesInstance}
+ */
 export function createSuspiciousEyes(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-suspicious-input-wrapper';

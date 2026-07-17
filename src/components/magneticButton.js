@@ -1,6 +1,29 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} MagneticButtonOptions
+ * @property {number} [magneticRange=90] - Pointer distance in px within
+ *   which the button starts being pulled toward the cursor.
+ * @property {number} [pullStrength=0.45] - How strongly the button follows
+ *   the cursor within range (0-1-ish; higher pulls harder).
+ */
+
+/**
+ * @typedef {Object} MagneticButtonInstance
+ * @property {HTMLElement} el - Root wrapper element; append this to the DOM.
+ * @property {() => void} destroy - Removes the window-level pointermove
+ *   listener, stops any in-flight hum sound, and removes the reduced-motion listener.
+ * @property {{magneticRange: number, pullStrength: number}} config -
+ *   Live-mutable physics knobs, read on every pointermove.
+ */
+
+/**
+ * Creates a button that magnetically follows the pointer within range and
+ * plays a proximity hum whose volume tracks distance.
+ * @param {MagneticButtonOptions} [options]
+ * @returns {MagneticButtonInstance}
+ */
 export function createMagneticButton(options = {}) {
   const wrapper = document.createElement('div');
   wrapper.className = 'winky-magnetic-btn-wrapper';

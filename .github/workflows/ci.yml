@@ -29,6 +29,9 @@ jobs:
       - name: Build (library)
         run: npm run build:lib
 
+      - name: Generate type declarations
+        run: npm run types
+
   react-package-build:
     name: Build (winky-wonky-react)
     runs-on: ubuntu-latest
@@ -52,3 +55,7 @@ jobs:
       - name: Verify built output has no JSX syntax
         working-directory: packages/winky-wonky-react
         run: node --check dist/index.js
+
+      - name: Generate type declarations
+        working-directory: packages/winky-wonky-react
+        run: npm run types

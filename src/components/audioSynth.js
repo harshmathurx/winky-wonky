@@ -9,7 +9,8 @@ let primeListenersAttached = false;
 
 function getAudioContext() {
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const Ctx = window.AudioContext || /** @type {*} */ (window).webkitAudioContext;
+    audioCtx = new Ctx();
     masterGainNode = audioCtx.createGain();
     masterGainNode.gain.value = isMuted ? 0 : masterVolume;
     masterGainNode.connect(audioCtx.destination);

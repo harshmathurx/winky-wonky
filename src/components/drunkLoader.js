@@ -1,6 +1,28 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} DrunkLoaderOptions
+ * @property {number} [baseSpeed=3.5] - Base rotation speed in degrees/frame.
+ * @property {number} [wobbleSeverity=4] - Max px offset of the wobble drift.
+ * @property {number} [drunkenness=2.8] - Amplitude of the speed oscillation.
+ */
+
+/**
+ * @typedef {Object} DrunkLoaderInstance
+ * @property {HTMLElement} el - Root element (spinner + status label); append this to the DOM.
+ * @property {() => void} destroy - Cancels the rAF loop and the reduced-motion listener.
+ * @property {{baseSpeed: number, wobbleSeverity: number, drunkenness: number}} config -
+ *   Live-mutable physics knobs, read every frame.
+ */
+
+/**
+ * Creates an indeterminate loading spinner that "stumbles" instead of
+ * spinning uniformly. Runs a continuous rAF loop by design — this is its
+ * idle/settled state, there is no interaction to idle back to.
+ * @param {DrunkLoaderOptions} [options]
+ * @returns {DrunkLoaderInstance}
+ */
 export function createDrunkLoader(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-drunk-loader-container';

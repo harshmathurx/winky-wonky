@@ -1,6 +1,43 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} RotaryPalette
+ * @property {string} name - Display name, also used as each dial hole's aria-label.
+ * @property {'dark'|string} theme - Applied to `<html data-theme>`; `'dark'`
+ *   removes the attribute (dark is the default theme).
+ * @property {Object<string, string>} colors - CSS custom property name →
+ *   value pairs applied to `document.documentElement.style`.
+ */
+
+/**
+ * @typedef {Object} RotaryColorPickerOptions
+ * @property {string} [ariaLabel='Color palette selector'] - Accessible name
+ *   for the dial's radiogroup.
+ * @property {RotaryPalette[]} [palettes] - Palettes to dial through; defaults
+ *   to 5 built-in theme palettes.
+ * @property {(palette: RotaryPalette) => void} [onDialComplete] - Called once
+ *   the dial animation finishes and the palette has been applied.
+ */
+
+/**
+ * @typedef {Object} RotaryColorPickerInstance
+ * @property {HTMLElement} el - Root element (dial + holes); append this to the DOM.
+ * @property {() => number} getValue - Index of the currently selected
+ *   palette in the `palettes` array, or -1 if none selected yet.
+ * @property {(index: number) => void} setValue - Dials to and applies the
+ *   palette at `index`. Note: unlike other components' `setValue`, this
+ *   drives the same visual dial animation and DOES invoke `onDialComplete`
+ *   (the palette application is the whole point of the call).
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ */
+
+/**
+ * Creates a rotary-dial color/theme palette picker; dialing a hole applies
+ * its palette's CSS custom properties to `document.documentElement`.
+ * @param {RotaryColorPickerOptions} [options]
+ * @returns {RotaryColorPickerInstance}
+ */
 export function createRotaryColorPicker(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-rotary-selector-container';
@@ -113,7 +150,7 @@ export function createRotaryColorPicker(options = {}) {
     hole.setAttribute('aria-checked', 'false');
     hole.setAttribute('aria-label', p.name);
     hole.tabIndex = 0;
-    hole.dataset.index = index;
+    hole.dataset.index = String(index);
 
     wheel.appendChild(hole);
     holes.push(hole);

@@ -59,7 +59,7 @@ export function createElasticDragList(options = {}) {
       li.setAttribute('aria-selected', 'false');
       li.tabIndex = 0;
       li.draggable = true;
-      li.dataset.index = index;
+      li.dataset.index = String(index);
 
       const handle = document.createElement('span');
       handle.className = 'winky-elastic-list-handle';

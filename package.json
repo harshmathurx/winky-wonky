@@ -29,10 +29,14 @@
   ],
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "types": "./dist/types/index.d.ts",
   "unpkg": "./dist/winky-wonky.min.js",
   "jsdelivr": "./dist/winky-wonky.min.js",
   "exports": {
-    ".": "./src/index.js",
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.js"
+    },
     "./style.css": "./src/winky-wonky.css",
     "./dist/*": "./dist/*",
     "./components/*": "./src/components/*"
@@ -46,6 +50,7 @@
     "dist/winky-wonky.es.js",
     "dist/winky-wonky.css",
     "dist/styles",
+    "dist/types",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -57,12 +62,14 @@
     "dev": "vite",
     "build": "vite build",
     "build:lib": "vite build --config vite.lib.config.js",
-    "prepublishOnly": "npm run build:lib",
+    "types": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build:lib && npm run types",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
     "vite": "^8.0.12",
     "vitest": "^4.1.10"
   }

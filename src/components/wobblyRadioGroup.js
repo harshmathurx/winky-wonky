@@ -18,6 +18,7 @@ import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js
  *   index. Updates DOM/ARIA; does NOT invoke `onChange`.
  * @property {(partial: {items?: string[]}) => void} setOptions - Rebuilds
  *   the radio list for a new set of items.
+ * @property {() => string[]} getItems - Returns a copy of the current item labels.
  * @property {() => void} destroy
  */
 

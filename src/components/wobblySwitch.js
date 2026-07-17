@@ -1,6 +1,36 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, makeFocusable, onKeyActivation, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} WobblySwitchOptions
+ * @property {string} [labelText='Enable Physics'] - Visible label text.
+ * @property {boolean} [initialState=false] - Starting on/off state.
+ * @property {number} [springPower=1.3] - Cubic-bezier overshoot factor for
+ *   the thumb's toggle animation.
+ * @property {string} [ariaLabel] - Accessible name for the switch; defaults
+ *   to `labelText`.
+ * @property {(isOn: boolean) => void} [onChange] - Called with the new
+ *   state whenever it's toggled by user interaction (never from `setValue`).
+ */
+
+/**
+ * @typedef {Object} WobblySwitchInstance
+ * @property {HTMLElement} el - Root element (track + label); append this to the DOM.
+ * @property {() => boolean} getValue - Current on/off state.
+ * @property {(value: boolean) => void} setValue - Programmatically sets the
+ *   state. Updates the DOM and ARIA state; does NOT invoke `onChange`.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{springPower: number}} config - Live-mutable secondary knob;
+ *   prefer `setOptions` for changes that need to update the applied CSS variable.
+ * @property {(partial: {springPower?: number, labelText?: string}) => void} setOptions -
+ *   Updates the spring power and/or label text.
+ */
+
+/**
+ * Creates a toggle switch with an overshooting, wobbly thumb animation.
+ * @param {WobblySwitchOptions} [options]
+ * @returns {WobblySwitchInstance}
+ */
 export function createWobblySwitch(options = {}) {
   const container = document.createElement('div');
   container.className = 'winky-wobbly-switch-wrapper';
