@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winky-Wonky — Getting Started</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/winky-wonky.css">
   <style>
     .example-nav {
       position: fixed; bottom: 1rem; right: 1rem; z-index: 1000;
@@ -160,7 +160,7 @@
     label: <span class="s">'Click me'</span>,
     onClick: () =&gt; console.log(<span class="s">'pressed'</span>)
   });
-  document.getElementById(<span class="s">'app'</span>).appendChild(btn);
+  document.getElementById(<span class="s">'app'</span>).appendChild(btn.el);
 &lt;/<span class="k">script</span>&gt;
         </div>
         <div class="gs-demo" id="cdnDemo"></div>
@@ -193,7 +193,7 @@
   onChange: (v) =&gt; console.log(<span class="s">'value:'</span>, v)
 });
 
-document.body.appendChild(slider);
+document.body.appendChild(slider.el);
         </div>
       </section>
 
@@ -239,13 +239,13 @@ document.body.appendChild(slider);
 <span class="k">import</span> { createRippleButton } <span class="k">from</span> <span class="s">'./components/rippleButton.js'</span>;
 
 <span class="k">const</span> btn = createRippleButton({ label: <span class="s">'Go'</span> });
-document.body.appendChild(btn);
+document.body.appendChild(btn.el);
         </div>
       </section>
 
       <section class="gs-section">
         <h3><span class="gs-num">2</span> Or grab from GitHub</h3>
-        <p>Every component lives in <code>src/components/</code>. Each file is under 250 lines. The CSS is in <code>src/style.css</code> — just grab the section for the component you want.</p>
+        <p>Every component lives in <code>src/components/</code>. Each file is under 250 lines. The CSS lives in <code>src/winky-wonky.css</code> (the aggregate) and <code>src/styles/</code> (one file per component) — grab the file for the component you want.</p>
         <div class="gs-code-block">
           <button class="gs-copy" onclick="copyCode(this)">Copy</button>
 <span class="c"># Clone the repo and copy what you need</span>
@@ -258,7 +258,7 @@ document.body.appendChild(btn);
 <span class="c">#   ... (25 total)</span>
 
 <span class="c"># CSS for each component is clearly labeled in:</span>
-<span class="c">#   src/style.css</span>
+<span class="c">#   src/winky-wonky.css   (aggregate — imports src/styles/*.css)</span>
         </div>
       </section>
     </div>
@@ -295,7 +295,7 @@ document.body.appendChild(btn);
       label: 'Try me — this is a live winky-wonky component',
       onClick: () => console.log('demo clicked'),
     });
-    document.getElementById('cdnDemo').appendChild(demo);
+    document.getElementById('cdnDemo').appendChild(demo.el);
 
     document.querySelectorAll('.gs-tab').forEach(tab => {
       tab.addEventListener('click', () => {

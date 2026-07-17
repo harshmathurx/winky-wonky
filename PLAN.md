@@ -103,38 +103,100 @@
 **Goal:** consumers get a library, not the playground; nothing collides.
 
 ### 2a. Strip playground code from the library (audit #4)
-- [ ] Remove `getControls()` and `getCodeSnippet()` from every component in
+- [x] Remove `getControls()` and `getCodeSnippet()` from every component in
       `src/components/`. Move that content into a playground-only registry
       (e.g. `src/playground/registry.js`) keyed by component name, consumed by
       `src/main.js`. The playground keeps its knob-tweaking UX; the library sheds it.
+      (Result: all 24 components stripped. Registry lives at
+      `src/playground/registry.js` — a `Map<factoryFn, metadataModule>` — plus one
+      `src/playground/registry/<name>.js` per component exporting `getControls(instance)`
+      (only where non-empty) and `getCodeSnippet()`. `src/main.js`'s `renderCard`
+      looks up `registry.get(data.generator)` instead of reading methods off the
+      returned node.)
 
 ### 2b. Namespace and split CSS (audit #5)
-- [ ] Prefix every shipped component class with `winky-` (e.g. `.accordion-item`
+- [x] Prefix every shipped component class with `winky-` (e.g. `.accordion-item`
       → `.winky-accordion-item`, `.seesaw-slider-track` →
       `.winky-seesaw-slider-track`). Update JS `className` assignments and CSS
       together — grep both directions to catch drift.
-- [ ] Split `src/style.css` (2,622 lines): per-component files in `src/styles/`,
+      (Result: mechanical 1:1 `winky-` prefix applied to every class token —
+      structural *and* modifier classes — in all 24 component `.js` files and their
+      matching `src/styles/*.css`. Several `@keyframes` names were prefixed too.
+      Two genuine cross-component CSS dependencies were found and reconciled:
+      `slinkyAccordion.js`'s inline `squash-press` animation now references
+      `mischievousButton.css`'s `winky-squash-press`, and `suspiciousEyes.js`'s
+      password input correctly reuses `typewriterInput.css`'s `winky-quill-input`.)
+- [x] Split `src/style.css` (2,622 lines): per-component files in `src/styles/`,
       an aggregate `src/winky-wonky.css` that imports them, and playground-only
       styles (`.app-container`, `.brand-*`, `.code-inspector`, nav, theme-wipe,
       etc.) moved to `src/playground/playground.css`. Update the `./style.css`
       export in `package.json` to point at the aggregate.
-- [ ] Verify the playground still looks right in `npm run dev` (spot-check all tabs
+      (Result: `src/style.css` deleted; replaced by `src/styles/_tokens.css`
+      (`:root`/theme-preset variables), `src/styles/_utilities.css` (focus-visible),
+      `src/styles/_a11y.css` (shared reduced-motion/pointer-coarse rules for shipped
+      component selectors), 24 per-component files, and the aggregate
+      `src/winky-wonky.css` (`@import`s all of the above). `src/playground/playground.css`
+      holds the app shell/hero/gallery/code-inspector/responsive rules and its own
+      playground-only reduced-motion block, and itself `@import`s the library
+      aggregate so `index.html` needs only one `<link>`. `package.json`'s
+      `./style.css` export and `files` list updated; `vite.lib.config.js`'s copy-css
+      plugin now copies `src/winky-wonky.css` **and** `src/styles/` into `dist/`
+      (the aggregate's `@import`s are relative, so both must ship together — this
+      was almost missed, see final report). Found and fixed one orphaned rule while
+      splitting: `.theme-wipe-overlay`/`@keyframes page-wipe` (playground's theme
+      toggle transition) was misplaced inside the original Rotary Dial CSS section;
+      moved to `playground.css`.)
+- [x] Verify the playground still looks right in `npm run dev` (spot-check all tabs
       and both themes) and that `examples/*.html` still work.
+      (Result: could not visually spot-check — verified instead via `npm run dev`
+      serving `index.html` and all four `examples/*.html` with HTTP 200, `npm run
+      build` succeeding, and grep-verifying no unprefixed component selectors
+      survive in `dist/styles/*.css`. Flagged for a human visual pass.)
 
 ### 2c. Honesty pass (audit #8)
-- [ ] README: correct the component count (25, not 18), document the 7 undocumented
+- [x] README: correct the component count (25, not 18), document the 7 undocumented
       exports (`wobblyRadioGroup`, `springyTabs`, `gravityToast`, `wobblySwitch`,
       `rippleButton`, `magneticNav`, `elasticDragList`).
-- [ ] Make every hardcoded aria-label an option (e.g. `ariaLabel` with the current
+      (Result: used **24**, not 25 — recounting `src/index.js`'s actual exports
+      gives 24 `create*` factories; `AudioSynth` and the 5 media-query helpers are
+      separate, not "components." The original 1.0.0 CHANGELOG's own category
+      breakdown (7+6+4+7) already summed to 24 despite its headline claiming 25, so
+      "25" was never actually correct either — flagging this as a deliberate
+      deviation from the plan's literal wording in service of the same honesty goal.
+      Also fixed a second live "18 components" instance in `index.html`'s hero
+      stats that the audit missed. All 7 previously-undocumented exports now have
+      full option tables in the Component Reference section, plus a new "Instance
+      API" section and updated Quick Start/React Usage snippets using `.el` and
+      controlled `value` usage.)
+- [x] Make every hardcoded aria-label an option (e.g. `ariaLabel` with the current
       string as default) — sweep `grep -n "aria-label\|'label'" src/components/*.js`.
-- [ ] Remove expando/private leaks where cheap (e.g. `toast._timer` → a WeakMap or
+      (Result: swept all 24 files; every hardcoded aria-label string became an
+      option with the original text as default — `ariaLabel` on 11 components,
+      `dismissAriaLabel` (gravityToast), `inputAriaLabel`/`revealAriaLabel`
+      (suspiciousEyes), `dodgeAriaLabel`/`squashAriaLabel`/`lazyAriaLabel`
+      (mischievousButton, 3 independently-labeled buttons). `magneticNav`'s
+      pre-existing `label` option and `wobblySwitch`/`typewriterInput`/`rippleButton`'s
+      pre-existing `ariaLabel` options were left as-is. Final grep for hardcoded
+      `setAttribute('aria-label', '...')` string literals: zero hits.)
+- [x] Remove expando/private leaks where cheap (e.g. `toast._timer` → a WeakMap or
       closure variable).
-- [ ] Bump version to `2.0.0-alpha.0` in both package.jsons; note breaking changes
+      (Result: `toast._timer` → `WeakMap` in `gravityToast.js`. All 24 components'
+      `wrapper.destroy = ...`/`wrapper.getControls = ...`/`wrapper.getCodeSnippet = ...`
+      expando-on-DOM-node patterns removed as part of the Phase 3 instance-API
+      conversion — `destroy` is now a plain closure returned in the instance object,
+      not a property assigned onto the DOM node. Final sweep for other `._foo`
+      expando patterns: zero hits.)
+- [x] Bump version to `2.0.0-alpha.0` in both package.jsons; note breaking changes
       in `CHANGELOG.md`.
+      (Result: done, including the react package's `winky-wonky` peerDependency
+      range bumped to `>=2.0.0-alpha.0`. `CHANGELOG.md` has a full `## [2.0.0-alpha.0]`
+      entry — Breaking/Fixed/Added sections covering every audit finding addressed
+      in Phases 1-3.)
 
 **Verify:** tests green; `npm run build:lib` output contains no `.app-container` or
 `getCodeSnippet`; `grep -rn '"accordion-item"\|btn-dodge' src/components/` finds only
 `winky-`-prefixed names.
+(All three confirmed — see final report.)
 
 ---
 
@@ -143,24 +205,63 @@
 **Goal:** components are controllable after creation; React wrappers can be
 controlled components.
 
-- [ ] Change every factory's return from a bare DOM node with duct-taped methods to
+- [x] Change every factory's return from a bare DOM node with duct-taped methods to
       an instance object: `{ el, getValue?, setValue?, destroy, on?/off? }`.
       Value-bearing components (sliders, toggles, checkbox, radio group, rating,
       tabs, switch, dropdown, input, progress, color picker) must implement
       `getValue`/`setValue`; `setValue` updates DOM + ARIA and does NOT fire
       `onChange` (standard controlled-component contract).
-- [ ] Update `src/main.js`, `examples/*.html`, and README snippets to the new
+      (Result: all 24 factories return `{ el, destroy, ... }`; the 12 value-bearing
+      components (tiltSlider, groovySlider, pendulumToggle, wobblyCheckbox,
+      wobblyRadioGroup, ratingStars, springyTabs, wobblySwitch, hingeDropdown,
+      typewriterInput, slimeProgress, rotaryColorPicker) additionally implement
+      `getValue`/`setValue` per the no-onChange contract. Components with
+      "secondary tunable knobs" beyond the primary value (e.g. tiltSlider's
+      `gravity`/`maxTilt`/`springLag`) expose a plain mutable `config` object for
+      passively-read knobs, or a `setOptions(partial)` method where changing the
+      knob requires an immediate recompute (e.g. groovySlider's notch/wave
+      redraw, hingeDropdown's reopen-if-open). `on`/`off` were not implemented
+      anywhere — no component has event types beyond the existing `onChange`
+      option, so there was nothing for them to add. One deliberate API deviation:
+      `wobblyRadioGroup`'s pre-existing `label` option was renamed to `ariaLabel`
+      for naming consistency with the rest of the library (breaking, but this is
+      the 2.0 major).)
+- [x] Update `src/main.js`, `examples/*.html`, and README snippets to the new
       API (`document.body.appendChild(slider.el)`).
-- [ ] Rewrite `packages/winky-wonky-react/index.js`:
+      (Result: `src/main.js`'s `renderCard`/`loadTab` updated to `instance.el`
+      throughout. All 4 `examples/*.html` files and both live and illustrative
+      code snippets in `getting-started.html` updated to `.el` and to the current
+      `winky-`-prefixed class names where they queried internals.)
+- [x] Rewrite `packages/winky-wonky-react/index.js`:
       - keep the mount/destroy effect pattern;
       - support controlled usage: when a `value` prop is passed, an effect calls
         `instance.setValue(value)`; `onChange` still proxies out;
       - `BalloonTooltip`'s `trigger` handling stays.
-- [ ] Tests: `setValue` updates `aria-valuenow`/`aria-checked` and does not invoke
+      (Result: rewritten at `packages/winky-wonky-react/src/index.jsx`.
+      `useWinkyComponent` now mounts `instance.el`, calls `instance.setValue(value)`
+      once immediately after creation (so a `value` prop is reflected from first
+      paint even for components with no dedicated "initial value" creation option,
+      e.g. `WobblyCheckbox`) and again in a `[value]`-keyed effect on every change.
+      No per-component "which option is the initial value" mapping was needed —
+      the single post-creation `setValue` call handles it uniformly.
+      `BalloonTooltip`'s separate `trigger`-keyed effect is unchanged.)
+- [x] Tests: `setValue` updates `aria-valuenow`/`aria-checked` and does not invoke
       `onChange`; keyboard interaction still fires `onChange` once per change;
       a controlled React `<TiltSlider value={x}/>` re-render moves the knob.
+      (Result: `tests/tiltSlider.test.js` has a new "instance API" describe block
+      covering `getValue`/`setValue` + the no-onChange guarantee (keyboard-fires-once
+      coverage already existed from Phase 1). `packages/winky-wonky-react/test/`
+      added (new — package had zero tests before): `TiltSlider.test.jsx` covers the
+      controlled-value-moves-the-knob case via `@testing-library/react`;
+      `WobblyCheckbox.test.jsx` covers the boolean/no-creation-option case.
+      `tests/smoke.test.js` rewritten for the `{ el, destroy, ... }` contract and
+      extended to assert `getValue`/`setValue` exist on the 12 value-bearing
+      components and that no `getControls`/`getCodeSnippet` leak onto instances.)
 
 **Verify:** full test suite green; playground and examples manually spot-checked.
+(Result: 35 root tests + 5 react-package tests, all green. Playground/examples
+spot-checked via HTTP smoke test, not visually — see Phase 2b note above and the
+final report's gotchas for Agent 3/the human owner.)
 
 ---
 

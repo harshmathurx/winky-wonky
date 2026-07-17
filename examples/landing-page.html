@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winky-Wonky — Landing Page Example</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌀</text></svg>">
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/winky-wonky.css">
   <style>
     .example-nav {
       position: fixed;
@@ -225,32 +225,32 @@
       items: ['Features', 'Pricing', 'Docs', 'Sign In'],
       activeIndex: 0,
     });
-    nav.style.width = 'auto';
-    document.getElementById('navSlot').appendChild(nav);
+    nav.el.style.width = 'auto';
+    document.getElementById('navSlot').appendChild(nav.el);
 
     const cta = createRippleButton({
       label: 'Start Free',
       onClick: () => console.log('CTA clicked'),
     });
-    document.getElementById('ctaSlot').appendChild(cta);
+    document.getElementById('ctaSlot').appendChild(cta.el);
 
     const secondaryCta = createRippleButton({
       label: 'Book a Demo',
     });
-    const secondaryBtn = secondaryCta.querySelector('.ripple-btn');
+    const secondaryBtn = secondaryCta.el.querySelector('.winky-ripple-btn');
     if (secondaryBtn) {
       secondaryBtn.style.background = 'var(--winky-bg-surface)';
       secondaryBtn.style.color = 'var(--winky-text-primary)';
       secondaryBtn.style.border = 'var(--winky-border-style)';
       secondaryBtn.style.boxShadow = 'none';
     }
-    document.getElementById('secondaryCtaSlot').appendChild(secondaryCta);
+    document.getElementById('secondaryCtaSlot').appendChild(secondaryCta.el);
 
     const footerCta = createRippleButton({
       label: 'Get Started',
       onClick: () => console.log('Footer CTA'),
     });
-    document.getElementById('footerCtaSlot').appendChild(footerCta);
+    document.getElementById('footerCtaSlot').appendChild(footerCta.el);
   </script>
 </body>
 </html>

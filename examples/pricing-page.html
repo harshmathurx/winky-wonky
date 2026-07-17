@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winky-Wonky — Pricing Page Example</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💫</text></svg>">
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/winky-wonky.css">
   <style>
     .example-nav {
       position: fixed;
@@ -254,31 +254,31 @@
         }
       },
     });
-    billingToggle.style.margin = '0 auto';
-    document.getElementById('billingToggleSlot').appendChild(billingToggle);
+    billingToggle.el.style.margin = '0 auto';
+    document.getElementById('billingToggleSlot').appendChild(billingToggle.el);
 
     const starterBtn = createRippleButton({ label: 'Get Started' });
-    const starterBtnEl = starterBtn.querySelector('.ripple-btn');
+    const starterBtnEl = starterBtn.el.querySelector('.winky-ripple-btn');
     if (starterBtnEl) {
       starterBtnEl.style.background = 'var(--winky-bg-surface)';
       starterBtnEl.style.color = 'var(--winky-text-primary)';
       starterBtnEl.style.border = 'var(--winky-border-style)';
       starterBtnEl.style.boxShadow = 'none';
     }
-    document.getElementById('starterBtnSlot').appendChild(starterBtn);
+    document.getElementById('starterBtnSlot').appendChild(starterBtn.el);
 
     const proBtn = createRippleButton({ label: 'Start Pro Trial' });
-    document.getElementById('proBtnSlot').appendChild(proBtn);
+    document.getElementById('proBtnSlot').appendChild(proBtn.el);
 
     const entBtn = createRippleButton({ label: 'Contact Sales' });
-    const entBtnEl = entBtn.querySelector('.ripple-btn');
+    const entBtnEl = entBtn.el.querySelector('.winky-ripple-btn');
     if (entBtnEl) {
       entBtnEl.style.background = 'var(--winky-bg-surface)';
       entBtnEl.style.color = 'var(--winky-text-primary)';
       entBtnEl.style.border = 'var(--winky-border-style)';
       entBtnEl.style.boxShadow = 'none';
     }
-    document.getElementById('entBtnSlot').appendChild(entBtn);
+    document.getElementById('entBtnSlot').appendChild(entBtn.el);
   </script>
 </body>
 </html>

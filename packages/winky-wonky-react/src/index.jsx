@@ -27,20 +27,46 @@ import {
   AudioSynth,
 } from 'winky-wonky';
 
-function useWinkyComponent(createFn, options) {
+// Mounts a winky-wonky factory instance (`{ el, destroy, getValue?, setValue? }`)
+// into a wrapper <div>, and supports controlled usage: when a `value` prop is
+// passed, an effect calls `instance.setValue(value)` on every change (and
+// once right after creation, so the DOM reflects `value` from first paint).
+// `setValue` never fires the component's own `onChange` — see each
+// component's `setValue` contract — so this can't create update loops with a
+// parent that does `onChange={setValue}`.
+function useWinkyComponent(createFn, props) {
   const ref = useRef(null);
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
+  const instanceRef = useRef(null);
+  const { value, ...creationOptions } = props;
+  const optionsRef = useRef(creationOptions);
+  optionsRef.current = creationOptions;
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   useEffect(() => {
     if (!ref.current) return;
-    const node = createFn(optionsRef.current);
-    ref.current.replaceChildren(node);
+    const instance = createFn(optionsRef.current);
+    if (valueRef.current !== undefined && instance.setValue) {
+      instance.setValue(valueRef.current);
+    }
+    instanceRef.current = instance;
+    ref.current.replaceChildren(instance.el);
 
     return () => {
-      if (node.destroy) node.destroy();
+      instance.destroy?.();
+      instanceRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createFn]);
+
+  // Controlled `value` prop: sync into the instance without re-mounting or
+  // firing `onChange`.
+  useEffect(() => {
+    const instance = instanceRef.current;
+    if (!instance || !instance.setValue || value === undefined) return;
+    if (instance.getValue && instance.getValue() === value) return;
+    instance.setValue(value);
+  }, [value]);
 
   return ref;
 }
@@ -80,9 +106,10 @@ export function BalloonTooltip({ trigger, ...props }) {
 
   useEffect(() => {
     if (!ref.current || !trigger) return;
-    const node = createBalloonTooltip({ ...props, triggerNode: trigger });
-    ref.current.replaceChildren(node);
-    return () => { if (node.destroy) node.destroy(); };
+    const instance = createBalloonTooltip({ ...props, triggerNode: trigger });
+    ref.current.replaceChildren(instance.el);
+    return () => { instance.destroy?.(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger]);
 
   return <div ref={ref} />;

@@ -23,6 +23,7 @@ import { createWobblySwitch } from './components/wobblySwitch.js';
 import { createRippleButton } from './components/rippleButton.js';
 import { createMagneticNav } from './components/magneticNav.js';
 import { createElasticDragList } from './components/elasticDragList.js';
+import { registry } from './playground/registry.js';
 
 // Elements
 const playgroundView = document.getElementById('playgroundView');
@@ -195,15 +196,19 @@ function renderCard(data) {
   const demoFrame = document.createElement('div');
   demoFrame.className = 'demo-frame';
   
-  // Initialize component node
-  const componentNode = data.generator();
-  demoFrame.appendChild(componentNode);
+  // Initialize component instance
+  const instance = data.generator();
+  demoFrame.appendChild(instance.el);
   card.appendChild(demoFrame);
-  activeComponents.push(componentNode);
+  activeComponents.push(instance);
+
+  // Playground-only metadata (controls panel + code snippet) — never part
+  // of the library itself, looked up by factory function.
+  const meta = registry.get(data.generator);
 
   // Controls Panel
-  if (componentNode.getControls) {
-    const controls = componentNode.getControls();
+  if (meta?.getControls) {
+    const controls = meta.getControls(instance);
     if (controls && controls.length > 0) {
       const ctrlPanel = document.createElement('div');
       ctrlPanel.className = 'controls-panel';
@@ -285,20 +290,20 @@ function renderCard(data) {
   }
 
   // Code Inspector
-  if (componentNode.getCodeSnippet) {
+  if (meta?.getCodeSnippet) {
     const codeInspector = document.createElement('div');
     codeInspector.className = 'code-inspector';
 
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'code-toggle-btn';
     toggleBtn.innerHTML = '<span>Show HTML/CSS</span><span>⟨/⟩</span>';
-    
+
     const codeContainer = document.createElement('div');
     codeContainer.className = 'code-container';
-    
+
     const pre = document.createElement('pre');
     const code = document.createElement('code');
-    code.textContent = componentNode.getCodeSnippet();
+    code.textContent = meta.getCodeSnippet();
     pre.appendChild(code);
     codeContainer.appendChild(pre);
 
@@ -306,7 +311,7 @@ function renderCard(data) {
     copyBtn.className = 'copy-btn';
     copyBtn.textContent = 'Copy';
     copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(componentNode.getCodeSnippet());
+      navigator.clipboard.writeText(meta.getCodeSnippet());
       copyBtn.textContent = 'Copied!';
       AudioSynth.playTick();
       setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);

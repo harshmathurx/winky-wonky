@@ -4,6 +4,22 @@ import * as WinkyWonky from '../src/index.js';
 
 const factoryNames = Object.keys(WinkyWonky).filter((name) => name.startsWith('create'));
 
+// audit #6 / Phase 3: components that must implement getValue/setValue.
+const valueBearing = new Set([
+  'createTiltSlider',
+  'createGroovySlider',
+  'createPendulumToggle',
+  'createWobblyCheckbox',
+  'createWobblyRadioGroup',
+  'createRatingStars',
+  'createSpringyTabs',
+  'createWobblySwitch',
+  'createHingeDropdown',
+  'createTypewriterInput',
+  'createSlimeProgress',
+  'createRotaryColorPicker',
+]);
+
 describe('winky-wonky smoke tests', () => {
   it('exports at least the 24 documented create* factories', () => {
     // src/index.js currently re-exports 24 createX factories plus AudioSynth
@@ -13,21 +29,32 @@ describe('winky-wonky smoke tests', () => {
   });
 
   for (const name of factoryNames) {
-    it(`${name}() returns a DOM node and can be destroyed without throwing`, () => {
+    it(`${name}() returns an { el, destroy } instance and can be destroyed without throwing`, () => {
       const factory = WinkyWonky[name];
-      let node;
+      let instance;
       expect(() => {
-        node = factory();
+        instance = factory();
       }).not.toThrow();
 
-      expect(node).toBeInstanceOf(globalThis.Node);
-      document.body.appendChild(node);
+      // Phase 3: factories return an instance object, not a bare DOM node.
+      expect(instance).toBeTruthy();
+      expect(instance.el).toBeInstanceOf(globalThis.Node);
+      expect(typeof instance.destroy).toBe('function');
 
-      if (typeof node.destroy === 'function') {
-        expect(() => node.destroy()).not.toThrow();
+      // Playground concerns must NOT leak into the library (audit #4).
+      expect(instance.getControls).toBeUndefined();
+      expect(instance.getCodeSnippet).toBeUndefined();
+      expect(instance.el.getControls).toBeUndefined();
+      expect(instance.el.getCodeSnippet).toBeUndefined();
+
+      if (valueBearing.has(name)) {
+        expect(typeof instance.getValue).toBe('function');
+        expect(typeof instance.setValue).toBe('function');
       }
 
-      node.remove();
+      document.body.appendChild(instance.el);
+      expect(() => instance.destroy()).not.toThrow();
+      instance.el.remove();
     });
   }
 

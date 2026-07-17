@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winky-Wonky — Settings Page Example</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/winky-wonky.css">
   <style>
     .example-nav {
       position: fixed;
@@ -243,43 +243,43 @@
       items: ['General', 'Notifications', 'Privacy', 'Billing'],
       activeIndex: 0,
     });
-    nav.style.flexDirection = 'column';
-    nav.style.width = '100%';
-    nav.querySelector('.magnetic-nav-list').style.flexDirection = 'column';
-    nav.querySelector('.magnetic-nav-list').style.gap = '0.25rem';
-    document.getElementById('settingsNavSlot').appendChild(nav);
+    nav.el.style.flexDirection = 'column';
+    nav.el.style.width = '100%';
+    nav.el.querySelector('.winky-magnetic-nav-list').style.flexDirection = 'column';
+    nav.el.querySelector('.winky-magnetic-nav-list').style.gap = '0.25rem';
+    document.getElementById('settingsNavSlot').appendChild(nav.el);
 
     const orgName = createTypewriterInput({
       placeholder: 'Acme Inc.',
       jitterStrength: 1,
       maxWobbleRotation: 3,
     });
-    orgName.style.width = '200px';
-    document.getElementById('orgNameSlot').appendChild(orgName);
+    orgName.el.style.width = '200px';
+    document.getElementById('orgNameSlot').appendChild(orgName.el);
 
     const themeRadio = createWobblyRadioGroup({
       items: ['Dark', 'Light', 'Auto'],
       initialIndex: 0,
     });
-    document.getElementById('themeSlot').appendChild(themeRadio);
+    document.getElementById('themeSlot').appendChild(themeRadio.el);
 
     const landingRadio = createWobblyRadioGroup({
       items: ['Dashboard', 'Projects', 'Inbox'],
       initialIndex: 0,
     });
-    document.getElementById('landingSlot').appendChild(landingRadio);
+    document.getElementById('landingSlot').appendChild(landingRadio.el);
 
     const emailNotif = createWobblySwitch({ labelText: '', initialState: true });
-    emailNotif.querySelector('.wobbly-switch-label').style.display = 'none';
-    document.getElementById('emailNotifSlot').appendChild(emailNotif);
+    emailNotif.el.querySelector('.winky-wobbly-switch-label').style.display = 'none';
+    document.getElementById('emailNotifSlot').appendChild(emailNotif.el);
 
     const pushNotif = createWobblySwitch({ labelText: '', initialState: false });
-    pushNotif.querySelector('.wobbly-switch-label').style.display = 'none';
-    document.getElementById('pushNotifSlot').appendChild(pushNotif);
+    pushNotif.el.querySelector('.winky-wobbly-switch-label').style.display = 'none';
+    document.getElementById('pushNotifSlot').appendChild(pushNotif.el);
 
     const soundCheckbox = createWobblyCheckbox({ labelText: '', isJitterEnabled: true });
-    soundCheckbox.querySelector('span:last-child').style.display = 'none';
-    document.getElementById('soundSlot').appendChild(soundCheckbox);
+    soundCheckbox.el.querySelector('span:last-child').style.display = 'none';
+    document.getElementById('soundSlot').appendChild(soundCheckbox.el);
 
     const volumeSlider = createTiltSlider({
       initialValue: 15,
@@ -287,26 +287,26 @@
       maxTilt: 8,
       onChange: (v) => AudioSynth.setVolume(v / 100),
     });
-    volumeSlider.style.width = '180px';
-    document.getElementById('volumeSlot').appendChild(volumeSlider);
+    volumeSlider.el.style.width = '180px';
+    document.getElementById('volumeSlot').appendChild(volumeSlider.el);
 
     const analyticsCheckbox = createWobblyCheckbox({ labelText: '', isJitterEnabled: true });
-    analyticsCheckbox.querySelector('span:last-child').style.display = 'none';
-    document.getElementById('analyticsSlot').appendChild(analyticsCheckbox);
+    analyticsCheckbox.el.querySelector('span:last-child').style.display = 'none';
+    document.getElementById('analyticsSlot').appendChild(analyticsCheckbox.el);
 
     const twoFactor = createWobblySwitch({ labelText: '', initialState: true });
-    twoFactor.querySelector('.wobbly-switch-label').style.display = 'none';
-    document.getElementById('twoFactorSlot').appendChild(twoFactor);
+    twoFactor.el.querySelector('.winky-wobbly-switch-label').style.display = 'none';
+    document.getElementById('twoFactorSlot').appendChild(twoFactor.el);
 
     const cancelBtn = createRippleButton({ label: 'Cancel' });
-    const cancelBtnEl = cancelBtn.querySelector('.ripple-btn');
+    const cancelBtnEl = cancelBtn.el.querySelector('.winky-ripple-btn');
     if (cancelBtnEl) {
       cancelBtnEl.style.background = 'var(--winky-bg-surface)';
       cancelBtnEl.style.color = 'var(--winky-text-primary)';
       cancelBtnEl.style.border = 'var(--winky-border-style)';
       cancelBtnEl.style.boxShadow = 'none';
     }
-    document.getElementById('saveBarSlot').appendChild(cancelBtn);
+    document.getElementById('saveBarSlot').appendChild(cancelBtn.el);
 
     const saveBtn = createRippleButton({
       label: 'Save Changes',
@@ -314,7 +314,7 @@
         showToast('Settings saved successfully');
       },
     });
-    document.getElementById('saveBarSlot').appendChild(saveBtn);
+    document.getElementById('saveBarSlot').appendChild(saveBtn.el);
 
     function showToast(message) {
       const toast = document.createElement('div');
