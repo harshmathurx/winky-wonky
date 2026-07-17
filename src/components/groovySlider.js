@@ -1,21 +1,51 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, makeFocusable, addPointerDrag, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} GroovySliderOptions
+ * @property {number} [initialValue=20] - Starting value, 0-100.
+ * @property {number} [notchCount=8] - Number of magnetic snap notches.
+ * @property {number} [waveAmplitude=18] - Sine-wave track height in px.
+ * @property {number} [snapThreshold=3.5] - Distance (in value units) within
+ *   which the knob snaps to the nearest notch.
+ * @property {string} [ariaLabel='Groovy wave slider'] - Accessible name.
+ * @property {(value: number) => void} [onChange] - Called with the rounded
+ *   value whenever it changes from user interaction (never from `setValue`).
+ */
+
+/**
+ * @typedef {Object} GroovySliderInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => number} getValue - Current rounded value (0-100).
+ * @property {(value: number) => void} setValue - Programmatically set the
+ *   value. Updates the DOM and ARIA state; does NOT invoke `onChange`.
+ * @property {(partial: {notchCount?: number, waveAmplitude?: number}) => void} setOptions -
+ *   Rebuilds the track/notches for structural knob changes.
+ * @property {() => void} destroy
+ * @property {{snapThreshold: number}} config - Live-mutable passive knob.
+ */
+
+/**
+ * Creates a slider that moves along a wavy sine track and snaps magnetically
+ * into notches.
+ * @param {GroovySliderOptions} [options]
+ * @returns {GroovySliderInstance}
+ */
 export function createGroovySlider(options = {}) {
   const container = document.createElement('div');
-  container.className = 'wave-slider-container';
+  container.className = 'winky-wave-slider-container';
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'wave-slider-svg');
+  svg.setAttribute('class', 'winky-wave-slider-svg');
   svg.setAttribute('aria-hidden', 'true');
 
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('class', 'wave-slider-path');
+  path.setAttribute('class', 'winky-wave-slider-path');
   svg.appendChild(path);
   container.appendChild(svg);
 
   const knob = document.createElement('div');
-  knob.className = 'wave-slider-knob';
+  knob.className = 'winky-wave-slider-knob';
   knob.setAttribute('aria-hidden', 'true');
   container.appendChild(knob);
 
@@ -27,8 +57,11 @@ export function createGroovySlider(options = {}) {
   let isDragging = false;
   let notchCount = options.notchCount ?? 8;
   let waveAmplitude = options.waveAmplitude ?? 18;
-  let snapThreshold = options.snapThreshold ?? 3.5;
+  const config = {
+    snapThreshold: options.snapThreshold ?? 3.5,
+  };
   const onChange = options.onChange;
+  const ariaLabel = options.ariaLabel ?? 'Groovy wave slider';
   let reducedMotion = prefersReducedMotion();
 
   let lastSnappedNotch = -1;
@@ -40,7 +73,7 @@ export function createGroovySlider(options = {}) {
     'valuemax': '100',
     'valuenow': String(Math.round(value)),
     'valuetext': `${Math.round(value)}%`,
-    'label': 'Groovy wave slider',
+    'label': ariaLabel,
   });
 
   function getPosition(val) {
@@ -72,7 +105,7 @@ export function createGroovySlider(options = {}) {
       const pos = getPosition(val);
 
       const notch = document.createElement('div');
-      notch.className = 'wave-notch';
+      notch.className = 'winky-wave-notch';
       notch.style.left = `${pos.x}px`;
       notch.style.top = `${pos.y}px`;
       container.appendChild(notch);
@@ -80,13 +113,15 @@ export function createGroovySlider(options = {}) {
     }
   }
 
-  function update(val, force = false) {
+  // silent=true suppresses onChange + the snap tick/jiggle/vibrate effects,
+  // used by setValue() so programmatic updates never fire the callback.
+  function update(val, force = false, silent = false) {
     let targetVal = val;
     let currentSnapped = -1;
 
     for (let i = 0; i < notchCount; i++) {
       const notchVal = i * (100 / (notchCount - 1));
-      if (Math.abs(val - notchVal) < snapThreshold) {
+      if (Math.abs(val - notchVal) < config.snapThreshold) {
         targetVal = notchVal;
         currentSnapped = i;
         break;
@@ -102,17 +137,17 @@ export function createGroovySlider(options = {}) {
     container.setAttribute('aria-valuenow', String(Math.round(value)));
     container.setAttribute('aria-valuetext', `${Math.round(value)}%`);
 
-    if (onChange && (currentSnapped !== lastSnappedNotch || force)) {
+    if (!silent && onChange && (currentSnapped !== lastSnappedNotch || force)) {
       onChange(Math.round(value));
     }
 
-    if (currentSnapped !== -1 && currentSnapped !== lastSnappedNotch && !force) {
+    if (!silent && currentSnapped !== -1 && currentSnapped !== lastSnappedNotch && !force) {
       AudioSynth.playTick();
 
       if (!reducedMotion) {
-        knob.classList.remove('jiggling');
+        knob.classList.remove('winky-jiggling');
         void knob.offsetWidth;
-        knob.classList.add('jiggling');
+        knob.classList.add('winky-jiggling');
       }
 
       if (navigator.vibrate) {
@@ -179,30 +214,25 @@ export function createGroovySlider(options = {}) {
   renderNotches();
   update(value, true);
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Notch Count', type: 'range', min: 3, max: 15, step: 1, value: notchCount, onChange: (v) => { notchCount = parseInt(v); renderNotches(); update(value, true); } },
-      { label: 'Wave Height', type: 'range', min: 0, max: 30, step: 1, value: waveAmplitude, onChange: (v) => { waveAmplitude = parseInt(v); drawPath(); renderNotches(); update(value, true); } },
-      { label: 'Snap Range %', type: 'range', min: 1.0, max: 8.0, step: 0.5, value: snapThreshold, onChange: (v) => { snapThreshold = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return Math.round(value);
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createGroovySlider } from 'winky-wonky';
+  function setValue(v) {
+    update(v, true, true);
+  }
 
-const slider = createGroovySlider({
-  initialValue: 20,
-  notchCount: 8,
-  waveAmplitude: 18,
-  snapThreshold: 3.5,
-  onChange: (value) => console.log('Snapped to value: ', value)
-});
-document.body.appendChild(slider);`;
-  };
+  function setOptions(partial = {}) {
+    if (partial.notchCount !== undefined) notchCount = partial.notchCount;
+    if (partial.waveAmplitude !== undefined) waveAmplitude = partial.waveAmplitude;
+    drawPath();
+    renderNotches();
+    update(value, true);
+  }
 
-  return container;
+  return { el: container, getValue, setValue, setOptions, destroy, config };
 }

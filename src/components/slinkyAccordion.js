@@ -1,9 +1,30 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SlinkyAccordionOptions
+ * @property {{title: string, content: string}[]} [items] - Accordion panels.
+ * @property {number} [springBounciness=1.35] - Overshoot amount for the open/close transition.
+ * @property {number} [transitionDuration=0.45] - Open/close transition duration in seconds.
+ */
+
+/**
+ * @typedef {Object} SlinkyAccordionInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => void} destroy - Removes listeners.
+ * @property {(partial: {springBounciness?: number, transitionDuration?: number}) => void} setOptions -
+ *   Update the spring/timing knobs and immediately re-render the open panel.
+ */
+
+/**
+ * Creates an accordion whose expand/collapse transition uses a custom
+ * spring curve that bounces past its target before settling.
+ * @param {SlinkyAccordionOptions} [options]
+ * @returns {SlinkyAccordionInstance}
+ */
 export function createSlinkyAccordion(options = {}) {
   const container = document.createElement('div');
-  container.className = 'slinky-accordion';
+  container.className = 'winky-slinky-accordion';
 
   const itemsData = options.items ?? [
     {
@@ -25,10 +46,10 @@ export function createSlinkyAccordion(options = {}) {
 
   itemsData.forEach((data, index) => {
     const item = document.createElement('div');
-    item.className = 'accordion-item';
+    item.className = 'winky-accordion-item';
 
     const tab = document.createElement('button');
-    tab.className = 'accordion-tab winky-focus-visible';
+    tab.className = 'winky-accordion-tab winky-focus-visible';
     tab.setAttribute('aria-expanded', index === openIndex ? 'true' : 'false');
     tab.setAttribute('aria-controls', `winky-panel-${index}`);
     tab.id = `winky-tab-${index}`;
@@ -38,21 +59,21 @@ export function createSlinkyAccordion(options = {}) {
     tab.appendChild(titleSpan);
 
     const icon = document.createElement('span');
-    icon.className = 'accordion-icon';
+    icon.className = 'winky-accordion-icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '\u25B6';
+    icon.textContent = '▶';
     tab.appendChild(icon);
 
     item.appendChild(tab);
 
     const panel = document.createElement('div');
-    panel.className = 'accordion-panel';
+    panel.className = 'winky-accordion-panel';
     panel.id = `winky-panel-${index}`;
     panel.setAttribute('role', 'region');
     panel.setAttribute('aria-labelledby', `winky-tab-${index}`);
 
     const content = document.createElement('div');
-    content.className = 'accordion-panel-content';
+    content.className = 'winky-accordion-panel-content';
     content.textContent = data.content;
     panel.appendChild(content);
 
@@ -71,7 +92,7 @@ export function createSlinkyAccordion(options = {}) {
       }
 
       if (!reducedMotion) {
-        tab.style.animation = 'squash-press 0.15s ease-out';
+        tab.style.animation = 'winky-squash-press 0.15s ease-out';
         setTimeout(() => { tab.style.animation = 'none'; }, 160);
       }
 
@@ -105,11 +126,11 @@ export function createSlinkyAccordion(options = {}) {
 
       if (isOpen) {
         item.panel.style.maxHeight = '140px';
-        item.icon.classList.add('open');
+        item.icon.classList.add('winky-open');
         item.tab.setAttribute('aria-expanded', 'true');
       } else {
         item.panel.style.maxHeight = '0px';
-        item.icon.classList.remove('open');
+        item.icon.classList.remove('winky-open');
         item.tab.setAttribute('aria-expanded', 'false');
       }
     });
@@ -122,30 +143,15 @@ export function createSlinkyAccordion(options = {}) {
     renderState();
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Accordion Spring', type: 'range', min: 1.0, max: 1.6, step: 0.1, value: springBounciness, onChange: (v) => { springBounciness = parseFloat(v); renderState(); } },
-      { label: 'Open Speed (s)', type: 'range', min: 0.2, max: 0.8, step: 0.05, value: transitionDuration, onChange: (v) => { transitionDuration = parseFloat(v); renderState(); } }
-    ];
-  };
+  function setOptions(partial = {}) {
+    if (partial.springBounciness != null) springBounciness = partial.springBounciness;
+    if (partial.transitionDuration != null) transitionDuration = partial.transitionDuration;
+    renderState();
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createSlinkyAccordion } from 'winky-wonky';
-
-const accordion = createSlinkyAccordion({
-  springBounciness: 1.4,
-  transitionDuration: 0.5,
-  items: [
-    { title: 'Card 1', content: 'Some description...' },
-    { title: 'Card 2', content: 'Another description...' }
-  ]
-});
-document.body.appendChild(accordion);`;
-  };
-
-  return container;
+  return { el: container, destroy, setOptions };
 }

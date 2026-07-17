@@ -3,7 +3,7 @@ import { setAria, trapFocus, onKeyActivation, prefersReducedMotion, onReducedMot
 
 export function createGrumpyModalTrigger(options = {}) {
   const triggerBtn = document.createElement('button');
-  triggerBtn.className = 'mischievous-btn winky-focus-visible';
+  triggerBtn.className = 'winky-mischievous-btn winky-focus-visible';
   triggerBtn.textContent = 'Trigger Modal';
   triggerBtn.style.backgroundColor = 'var(--winky-accent-alt)';
   triggerBtn.setAttribute('aria-haspopup', 'dialog');
@@ -15,7 +15,7 @@ export function createGrumpyModalTrigger(options = {}) {
   let reducedMotion = prefersReducedMotion();
 
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  overlay.className = 'winky-modal-overlay';
   overlay.style.position = 'fixed';
   overlay.style.top = '0';
   overlay.style.left = '0';
@@ -32,27 +32,27 @@ export function createGrumpyModalTrigger(options = {}) {
   overlay.setAttribute('role', 'presentation');
 
   const box = document.createElement('div');
-  box.className = 'grumpy-modal-box';
+  box.className = 'winky-grumpy-modal-box';
   box.setAttribute('role', 'dialog');
   box.setAttribute('aria-modal', 'true');
   box.setAttribute('aria-labelledby', 'grumpy-modal-title');
 
   const header = document.createElement('div');
-  header.className = 'modal-header';
+  header.className = 'winky-modal-header';
   header.id = 'grumpy-modal-title';
   header.textContent = headerText;
   box.appendChild(header);
 
   const modalBody = document.createElement('div');
-  modalBody.className = 'modal-body';
+  modalBody.className = 'winky-modal-body';
   modalBody.textContent = bodyText;
   box.appendChild(modalBody);
 
   const footer = document.createElement('div');
-  footer.className = 'modal-footer';
+  footer.className = 'winky-modal-footer';
 
   const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-btn modal-btn-close winky-focus-visible';
+  closeBtn.className = 'winky-modal-btn winky-modal-btn-close winky-focus-visible';
   closeBtn.textContent = buttonText;
   footer.appendChild(closeBtn);
 
@@ -70,7 +70,7 @@ export function createGrumpyModalTrigger(options = {}) {
 
     AudioSynth.playTick();
     document.body.appendChild(overlay);
-    overlay.classList.add('open');
+    overlay.classList.add('winky-open');
     isModalOpen = true;
     previouslyFocused = document.activeElement;
 
@@ -82,7 +82,7 @@ export function createGrumpyModalTrigger(options = {}) {
 
   function closeModal() {
     AudioSynth.playClack();
-    overlay.classList.remove('open');
+    overlay.classList.remove('winky-open');
     isModalOpen = false;
 
     setTimeout(() => {
@@ -97,9 +97,9 @@ export function createGrumpyModalTrigger(options = {}) {
   function triggerGrumpyShake() {
     AudioSynth.playClack();
     if (reducedMotion) return;
-    box.classList.remove('shaking');
+    box.classList.remove('winky-shaking');
     void box.offsetWidth;
-    box.classList.add('shaking');
+    box.classList.add('winky-shaking');
   }
 
   triggerBtn.addEventListener('click', openModal);
@@ -112,44 +112,28 @@ export function createGrumpyModalTrigger(options = {}) {
     }
   });
 
-  document.addEventListener('keydown', (e) => {
+  function handleDocumentKeydown(e) {
     if (!isModalOpen) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       triggerGrumpyShake();
     }
-  });
+  }
+  document.addEventListener('keydown', handleDocumentKeydown);
 
   box.addEventListener('animationend', () => {
-    box.classList.remove('shaking');
+    box.classList.remove('winky-shaking');
   });
 
   const motionListener = onReducedMotionChange(() => {
     reducedMotion = prefersReducedMotion();
   });
 
-  triggerBtn.destroy = () => {
+  function destroy() {
     if (isModalOpen) closeModal();
+    document.removeEventListener('keydown', handleDocumentKeydown);
     motionListener();
-  };
+  }
 
-  triggerBtn.getControls = () => {
-    return [
-      { label: 'Grumpy Volume', type: 'button', value: 'Test Buzzer', onChange: () => { AudioSynth.playClack(); } }
-    ];
-  };
-
-  triggerBtn.getCodeSnippet = () => {
-    return `import { createGrumpyModalTrigger } from 'winky-wonky';
-
-const trigger = createGrumpyModalTrigger({
-  headerText: 'System Error!',
-  bodyText: 'Do not ignore this warning message...',
-  buttonText: 'I Accept My Fate',
-  onClose: () => console.log('Grumpy modal closed successfully')
-});
-document.body.appendChild(trigger);`;
-  };
-
-  return triggerBtn;
+  return { el: triggerBtn, destroy };
 }

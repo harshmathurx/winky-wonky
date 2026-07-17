@@ -24,7 +24,7 @@
    ```bash
    npm pack --dry-run
    ```
-   Should show 33 files: src/components/*, src/index.js, src/style.css, dist/winky-wonky.min.js, dist/winky-wonky.css, README.md, LICENSE, package.json
+   Should show: src/components/*, src/index.js, src/winky-wonky.css, src/styles/*, dist/winky-wonky.min.js, dist/winky-wonky.css, README.md, LICENSE, CHANGELOG.md, package.json (file count will differ from older releases — the CSS is now split into one file per component instead of a single src/style.css)
 
 4. **Check package name is available**
    ```bash

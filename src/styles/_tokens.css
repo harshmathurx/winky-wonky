@@ -1,0 +1,85 @@
+/* ==========================================
+   WINKY-WONKY DESIGN SYSTEM
+   Default: Dark Premium
+   ========================================== */
+
+:root {
+  --winky-bg-primary: #0A0A0F;
+  --winky-bg-secondary: #14141C;
+  --winky-bg-surface: #1A1A24;
+  --winky-bg-glass: rgba(26, 26, 36, 0.72);
+  --winky-accent-color: #6366F1;
+  --winky-accent-glow: rgba(99, 102, 241, 0.3);
+  --winky-accent-alt: #8B5CF6;
+  --winky-accent-teal: #2DD4BF;
+  --winky-text-primary: #F4F4F8;
+  --winky-text-secondary: #9494A8;
+  --winky-text-muted: #5A5A6E;
+  --winky-border-color: rgba(255, 255, 255, 0.08);
+  --winky-border-strong: rgba(255, 255, 255, 0.14);
+  --winky-font-sans: 'Inter', system-ui, sans-serif;
+  --winky-font-display: 'Space Grotesk', sans-serif;
+  --winky-font-mono: 'JetBrains Mono', monospace;
+  --winky-border-radius: 12px;
+  --winky-border-radius-sm: 8px;
+  --winky-border-radius-lg: 20px;
+  --winky-border-style: 1px solid var(--winky-border-color);
+  --winky-border-style-strong: 1px solid var(--winky-border-strong);
+  --winky-box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --winky-box-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --winky-box-shadow-glow: 0 0 20px var(--winky-accent-glow);
+  --winky-transition-speed: 0.2s;
+  --winky-transition: all var(--winky-transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  --winky-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --winky-gentle-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --winky-space-xs: 0.5rem;
+  --winky-space-sm: 0.75rem;
+  --winky-space-md: 1rem;
+  --winky-space-lg: 1.5rem;
+  --winky-space-xl: 2.5rem;
+  --winky-space-2xl: 4rem;
+}
+
+/* Wes Anderson Preset */
+[data-theme="anderson"] {
+  --winky-bg-primary: #FAF6F0;
+  --winky-bg-secondary: #F1E4C3;
+  --winky-bg-surface: #FFFDF8;
+  --winky-bg-glass: rgba(255, 253, 248, 0.72);
+  --winky-accent-color: #D8A035;
+  --winky-accent-glow: rgba(216, 160, 53, 0.25);
+  --winky-accent-alt: #E5A9A9;
+  --winky-accent-teal: #7DB3B3;
+  --winky-text-primary: #2B2520;
+  --winky-text-secondary: #6B6356;
+  --winky-text-muted: #9A9082;
+  --winky-border-color: rgba(43, 37, 32, 0.12);
+  --winky-border-strong: rgba(43, 37, 32, 0.2);
+  --winky-font-sans: 'Inter', sans-serif;
+  --winky-font-display: 'Playfair Display', serif;
+  --winky-box-shadow: 0 4px 24px rgba(43, 37, 32, 0.08);
+  --winky-box-shadow-hover: 0 8px 32px rgba(43, 37, 32, 0.12);
+  --winky-box-shadow-glow: 0 0 20px rgba(216, 160, 53, 0.2);
+}
+
+/* Tim Burton Preset */
+[data-theme="burton"] {
+  --winky-bg-primary: #0D0C13;
+  --winky-bg-secondary: #16151E;
+  --winky-bg-surface: #1C1B28;
+  --winky-bg-glass: rgba(28, 27, 40, 0.72);
+  --winky-accent-color: #F37F30;
+  --winky-accent-glow: rgba(243, 127, 48, 0.3);
+  --winky-accent-alt: #7B3E8C;
+  --winky-accent-teal: #496F5E;
+  --winky-text-primary: #ECE9F2;
+  --winky-text-secondary: #A09EB0;
+  --winky-text-muted: #5A576E;
+  --winky-border-color: rgba(255, 255, 255, 0.06);
+  --winky-border-strong: rgba(255, 255, 255, 0.12);
+  --winky-font-sans: 'JetBrains Mono', monospace;
+  --winky-font-display: 'JetBrains Mono', monospace;
+  --winky-box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --winky-box-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.65);
+  --winky-box-shadow-glow: 0 0 20px rgba(243, 127, 48, 0.25);
+}

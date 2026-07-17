@@ -1,6 +1,37 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, makeFocusable, addPointerDrag, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} TiltSliderOptions
+ * @property {number} [initialValue=50] - Starting value, 0-100.
+ * @property {number} [gravity=0.4] - How strongly the knob slides down the
+ *   tilted track once released (0.1-1.5 is a sane range).
+ * @property {number} [maxTilt=15] - Maximum seesaw tilt angle in degrees.
+ * @property {number} [springLag=0.2] - Drag-follow lag (0-1, higher = snappier).
+ * @property {string} [ariaLabel='Seesaw volume slider'] - Accessible name for the slider.
+ * @property {(value: number) => void} [onChange] - Called with the rounded
+ *   value whenever it changes from user interaction (never from `setValue`).
+ */
+
+/**
+ * @typedef {Object} TiltSliderInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => number} getValue - Current rounded value (0-100).
+ * @property {(value: number) => void} setValue - Programmatically set the
+ *   value. Updates the DOM and ARIA state; does NOT invoke `onChange`.
+ * @property {() => void} destroy - Cancels the render loop, stops any
+ *   in-flight sound, and removes listeners.
+ * @property {{gravity: number, maxTilt: number, springLag: number}} config -
+ *   Live-mutable secondary physics knobs (used by the playground's tuning
+ *   panel; most consumers just pass options at creation time instead).
+ */
+
+/**
+ * Creates a "seesaw" slider: hovering tilts the track and gravity slides the
+ * knob down-slope; dragging moves it directly.
+ * @param {TiltSliderOptions} [options]
+ * @returns {TiltSliderInstance}
+ */
 export function createTiltSlider(options = {}) {
   const wrapper = document.createElement('div');
   wrapper.style.display = 'flex';
@@ -9,22 +40,22 @@ export function createTiltSlider(options = {}) {
   wrapper.style.width = '100%';
 
   const track = document.createElement('div');
-  track.className = 'seesaw-slider-track';
+  track.className = 'winky-seesaw-slider-track';
   track.setAttribute('role', 'slider');
   makeFocusable(track);
   track.classList.add('winky-focus-visible');
 
   const pivot = document.createElement('div');
-  pivot.className = 'seesaw-pivot';
+  pivot.className = 'winky-seesaw-pivot';
   track.appendChild(pivot);
 
   const knob = document.createElement('div');
-  knob.className = 'seesaw-slider-knob';
+  knob.className = 'winky-seesaw-slider-knob';
   knob.setAttribute('aria-hidden', 'true');
   track.appendChild(knob);
 
   const valueDisplay = document.createElement('div');
-  valueDisplay.className = 'seesaw-value';
+  valueDisplay.className = 'winky-seesaw-value';
   valueDisplay.textContent = '50%';
   knob.appendChild(valueDisplay);
 
@@ -33,10 +64,13 @@ export function createTiltSlider(options = {}) {
   let value = options.initialValue ?? 50;
   let angle = 0;
   let isDragging = false;
-  let gravity = options.gravity ?? 0.4;
-  let maxTilt = options.maxTilt ?? 15;
-  let springLag = options.springLag ?? 0.2;
+  const config = {
+    gravity: options.gravity ?? 0.4,
+    maxTilt: options.maxTilt ?? 15,
+    springLag: options.springLag ?? 0.2,
+  };
   const onChange = options.onChange;
+  const ariaLabel = options.ariaLabel ?? 'Seesaw volume slider';
 
   let targetValue = value;
   let activeSlideSound = null;
@@ -47,7 +81,7 @@ export function createTiltSlider(options = {}) {
     'valuemax': '100',
     'valuenow': String(Math.round(value)),
     'valuetext': `${Math.round(value)}%`,
-    'label': 'Seesaw volume slider',
+    'label': ariaLabel,
   });
 
   function updateAria() {
@@ -64,6 +98,21 @@ export function createTiltSlider(options = {}) {
     if (onChange) onChange(rounded);
   }
 
+  // Paint DOM + ARIA from current `value`/`angle` state. Pure — no physics,
+  // no onChange. Shared by the render loop and by setValue().
+  function paint() {
+    knob.style.left = `${value}%`;
+    const displayVal = Math.round(value);
+    valueDisplay.textContent = `${displayVal}%`;
+    valueDisplay.style.transform = `translateX(-50%) rotate(${-angle}deg)`;
+
+    if (!reducedMotion) {
+      track.style.transform = `rotate(${angle}deg)`;
+    }
+
+    updateAria();
+  }
+
   // True while the physics still needs to move on its own (gravity pulling
   // the value back, or the drag spring lagging toward its target) — i.e.
   // frames the loop must keep producing even without new interaction events.
@@ -75,25 +124,16 @@ export function createTiltSlider(options = {}) {
 
   function updateRender() {
     if (!isDragging && Math.abs(angle) > 0.5 && !reducedMotion) {
-      const gravityForce = Math.sin(angle * Math.PI / 180) * gravity * 15;
+      const gravityForce = Math.sin(angle * Math.PI / 180) * config.gravity * 15;
       value += gravityForce;
       value = Math.max(0, Math.min(100, value));
       targetValue = value;
     } else if (isDragging) {
-      value += (targetValue - value) * springLag;
+      value += (targetValue - value) * config.springLag;
     }
 
-    knob.style.left = `${value}%`;
-    const displayVal = Math.round(value);
-    valueDisplay.textContent = `${displayVal}%`;
-    valueDisplay.style.transform = `translateX(-50%) rotate(${-angle}deg)`;
-
-    if (!reducedMotion) {
-      track.style.transform = `rotate(${angle}deg)`;
-    }
-
+    paint();
     emitChange(value);
-    updateAria();
 
     if (activeSlideSound && Math.abs(targetValue - value) > 0.05) {
       const pitch = 200 + (value / 100) * 400 + Math.abs(angle) * 8;
@@ -132,7 +172,7 @@ export function createTiltSlider(options = {}) {
     const mouseX = e.clientX - rect.left;
     const centerX = rect.width / 2;
     const percent = (mouseX - centerX) / centerX;
-    angle = percent * maxTilt;
+    angle = percent * config.maxTilt;
     requestRender();
 
     if (!activeSlideSound) {
@@ -218,34 +258,25 @@ export function createTiltSlider(options = {}) {
     requestRender();
   });
 
-  wrapper.destroy = () => {
+  function destroy() {
     if (animId != null) cancelAnimationFrame(animId);
     if (activeSlideSound) activeSlideSound.stop();
     track.removeEventListener('pointermove', handleTiltMove);
     track.removeEventListener('pointerleave', resetTilt);
     motionListener();
-  };
+  }
 
-  wrapper.getControls = () => {
-    return [
-      { label: 'Gravity Power', type: 'range', min: 0.1, max: 1.5, step: 0.1, value: gravity, onChange: (v) => { gravity = parseFloat(v); } },
-      { label: 'Max Seesaw Tilt', type: 'range', min: 5, max: 30, step: 1, value: maxTilt, onChange: (v) => { maxTilt = parseInt(v); } },
-      { label: 'Spring Lag', type: 'range', min: 0.05, max: 1.0, step: 0.05, value: springLag, onChange: (v) => { springLag = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return Math.round(value);
+  }
 
-  wrapper.getCodeSnippet = () => {
-    return `import { createTiltSlider } from 'winky-wonky';
+  function setValue(v) {
+    value = Math.max(0, Math.min(100, v));
+    targetValue = value;
+    angle = 0;
+    lastEmittedValue = Math.round(value);
+    paint();
+  }
 
-const slider = createTiltSlider({
-  initialValue: 50,
-  gravity: 0.4,
-  maxTilt: 15,
-  springLag: 0.2,
-  onChange: (value) => console.log('Volume is: ', value)
-});
-document.body.appendChild(slider);`;
-  };
-
-  return wrapper;
+  return { el: wrapper, getValue, setValue, destroy, config };
 }

@@ -1,6 +1,6 @@
 {
   "name": "winky-wonky",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "description": "A whimsical, physics-based, audio-synthesized design system inspired by Wes Anderson and Tim Burton. Wobbly buttons, seesaw sliders, pendulum toggles, slingshot uploads, and more.",
   "type": "module",
   "license": "MIT",
@@ -33,18 +33,22 @@
   "jsdelivr": "./dist/winky-wonky.min.js",
   "exports": {
     ".": "./src/index.js",
-    "./style.css": "./src/style.css",
+    "./style.css": "./src/winky-wonky.css",
     "./dist/*": "./dist/*",
     "./components/*": "./src/components/*"
   },
   "files": [
     "src/index.js",
-    "src/style.css",
+    "src/winky-wonky.css",
+    "src/styles",
     "src/components",
     "dist/winky-wonky.min.js",
+    "dist/winky-wonky.es.js",
     "dist/winky-wonky.css",
+    "dist/styles",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "sideEffects": [
     "*.css"

@@ -2,7 +2,7 @@
 
 A whimsical, physics-based, audio-synthesized design system inspired by the aesthetics of Wes Anderson and Tim Burton. It replaces standard rigid UI elements with wobbly buttons, seesawing volume sliders, gravity pendulums, wobbly text fields, and slingshot upload catapults.
 
-**18 components. Zero dependencies. 100% vanilla JS. Fully accessible.**
+**24 components. Zero dependencies. 100% vanilla JS. Fully accessible.**
 
 ---
 
@@ -24,6 +24,8 @@ npm install winky-wonky winky-wonky-react
 
 ### Vanilla JS
 
+Every factory returns an **instance**, not a bare DOM node — mount `instance.el`:
+
 ```javascript
 import 'winky-wonky/style.css';
 import { createTiltSlider } from 'winky-wonky';
@@ -35,7 +37,12 @@ const slider = createTiltSlider({
   onChange: (value) => console.log('Volume:', value)
 });
 
-document.getElementById('app').appendChild(slider);
+document.getElementById('app').appendChild(slider.el);
+
+// Later — e.g. syncing from external state:
+slider.setValue(75);   // updates the DOM + ARIA, does NOT fire onChange
+slider.getValue();     // => 75
+slider.destroy();      // tears down listeners, timers, and rAF loops
 ```
 
 ### React
@@ -55,6 +62,43 @@ function App() {
 }
 ```
 
+React components can also be **controlled** — pass a `value` prop and it stays in sync with your state, without ever firing `onChange` back at itself:
+
+```jsx
+function VolumeControl() {
+  const [volume, setVolume] = useState(40);
+  return <TiltSlider value={volume} onChange={setVolume} />;
+}
+```
+
+---
+
+## Instance API
+
+Every `createX()` factory returns a plain object, not a DOM node:
+
+```javascript
+const instance = createTiltSlider(options);
+// instance.el       — the root DOM node; append this, not `instance`
+// instance.destroy() — removes listeners/timers/rAF loops
+// instance.getValue()  — present on value-bearing components (see below)
+// instance.setValue(v) — present on value-bearing components; updates the
+//                        DOM + ARIA state but never invokes `onChange`
+//                        (the standard "controlled component" contract)
+```
+
+`getValue`/`setValue` are implemented by every value-bearing component:
+`TiltSlider`, `GroovySlider`, `PendulumToggle`, `WobblyCheckbox`,
+`WobblyRadioGroup`, `RatingStars`, `SpringyTabs`, `WobblySwitch`,
+`HingeDropdown`, `TypewriterInput`, `SlimeProgress`, `RotaryColorPicker`.
+
+Gestural/novelty components with no single canonical "value" (`MischievousButtons`,
+`BalloonTooltip`, `GrumpyModalTrigger`, `DrunkLoader`, `SuspiciousEyes`,
+`SlingshotUpload`, `MagneticButton`, `GravityToast`, `RippleButton`,
+`MagneticNav`, `ElasticDragList`, `SlinkyAccordion`) return just `{ el, destroy }`
+(some also expose a live-mutable `config` object for secondary tuning knobs —
+see each component's JSDoc in `src/components/`).
+
 ---
 
 ## Accessibility
@@ -62,6 +106,7 @@ function App() {
 Winky-Wonky is built to be usable by everyone. Every component includes:
 
 - **ARIA roles & labels** — sliders, switches, checkboxes, dialogs, tooltips, progressbars all use correct semantics
+- **Configurable labels** — every accessible name that used to be a hardcoded string is now an option (e.g. `ariaLabel`, `dismissAriaLabel`), so screen-reader text can be translated or made instance-specific
 - **Keyboard navigation** — all interactive components are operable with Tab, Arrow keys, Enter, Space, Escape, Home, End
 - **`prefers-reduced-motion`** — all wobble, jiggle, shake, and float animations are automatically disabled when the user requests reduced motion. Components remain fully functional, just without the physics flourish
 - **`prefers-reduced-sound`** — all synthesized audio (ticks, clacks, squeaks, pops) is automatically silenced
@@ -70,7 +115,17 @@ Winky-Wonky is built to be usable by everyone. Every component includes:
 
 ---
 
-## CSS Variables API
+## CSS
+
+Import once, globally:
+
+```javascript
+import 'winky-wonky/style.css';
+```
+
+That pulls in `src/winky-wonky.css` — the published aggregate, which imports design tokens, shared focus/reduced-motion rules, and one stylesheet per component from `src/styles/`. **Every shipped class is `winky-`-prefixed** (`.winky-seesaw-slider-track`, `.winky-accordion-item`, `.winky-btn-dodge`, …) so it won't collide with your own CSS. If you only want a subset, the per-component files in `src/styles/*.css` (and `dist/styles/*.css` in the published package) can be imported individually — just also import `src/styles/_tokens.css` for the `--winky-*` variables they rely on.
+
+### CSS Variables API
 
 All visual tokens are namespaced with `--winky-` to prevent collisions. Override in your global CSS:
 
@@ -129,7 +184,9 @@ Audio is automatically gated until user interaction (browser autoplay policy) an
 
 ## Component Reference
 
-### `createTiltSlider(options)`
+Value-bearing components (`getValue`/`setValue`) are marked **●**.
+
+### `createTiltSlider(options)` ●
 A seesaw slider that tilts under your cursor. The knob slides down the slope under gravity.
 
 | Option | Default | Description |
@@ -138,11 +195,12 @@ A seesaw slider that tilts under your cursor. The knob slides down the slope und
 | `gravity` | `0.4` | Pull speed down the slope |
 | `maxTilt` | `15` | Maximum tilt in degrees |
 | `springLag` | `0.2` | Drag spring elasticity |
+| `ariaLabel` | `'Seesaw volume slider'` | Accessible name |
 | `onChange(value)` | — | Callback |
 
-**ARIA:** `role="slider"`, keyboard: Arrow keys, Home, End
+**ARIA:** `role="slider"`, keyboard: Arrow keys, Home, End. **Value:** number 0-100.
 
-### `createGroovySlider(options)`
+### `createGroovySlider(options)` ●
 A slider that rides a sine wave track and snaps magnetically into notches.
 
 | Option | Default | Description |
@@ -151,9 +209,10 @@ A slider that rides a sine wave track and snaps magnetically into notches.
 | `notchCount` | `8` | Number of snapping notches |
 | `waveAmplitude` | `18` | Wave peak height |
 | `snapThreshold` | `3.5` | Magnetic snap radius |
+| `ariaLabel` | `'Groovy wave slider'` | Accessible name |
 | `onChange(value)` | — | Callback |
 
-**ARIA:** `role="slider"`, keyboard: Arrow keys, Home, End
+**ARIA:** `role="slider"`, keyboard: Arrow keys, Home, End. **Value:** number 0-100.
 
 ### `createMischievousButtons(options)`
 Three buttons: a dodger that evades your cursor, a squash-stretch, and a lazy-shadow tactile press.
@@ -163,11 +222,14 @@ Three buttons: a dodger that evades your cursor, a squash-stretch, and a lazy-sh
 | `isDodgeEnabled` | `true` | Enable cursor evasion |
 | `dodgePower` | `0.8` | Evasion speed multiplier |
 | `maxDodgeRange` | `75` | Evasion radius limit (px) |
+| `dodgeAriaLabel` | `'Dodge button — try to catch it'` | Accessible name for the dodge button |
+| `squashAriaLabel` | `'Squash and stretch button'` | Accessible name for the squash button |
+| `lazyAriaLabel` | `'Tactile button with lazy shadow'` | Accessible name for the lazy-shadow button |
 | `onClick(type)` | — | Callback (`'dodge'`, `'squash'`, `'lazy-shadow'`) |
 
 **ARIA:** Buttons with labels. Dodge disabled under reduced-motion.
 
-### `createHingeDropdown(options)`
+### `createHingeDropdown(options)` ●
 A dropdown that swings open from a hinge like a wooden shop sign.
 
 | Option | Default | Description |
@@ -176,11 +238,12 @@ A dropdown that swings open from a hinge like a wooden shop sign.
 | `options` | preset list | Array of option strings |
 | `hingeOrigin` | `'top left'` | Hinge corner |
 | `swingSpeed` | `1.8` | Swing duration (seconds) |
+| `ariaLabel` | trigger's visible text | Accessible name |
 | `onSelect(value)` | — | Callback |
 
-**ARIA:** `aria-haspopup="listbox"`, `role="listbox"`, keyboard: Arrow keys, Enter, Escape
+**ARIA:** `aria-haspopup="listbox"`, `role="listbox"`, keyboard: Arrow keys, Enter, Escape. **Value:** selected option string.
 
-### `createTypewriterInput(options)`
+### `createTypewriterInput(options)` ●
 A text input that jitters on each keystroke and projects characters into a floating preview.
 
 | Option | Default | Description |
@@ -188,11 +251,12 @@ A text input that jitters on each keystroke and projects characters into a float
 | `placeholder` | `'Type something peculiar...'` | Placeholder text |
 | `jitterStrength` | `3` | Shake intensity (px) |
 | `maxWobbleRotation` | `12` | Character wobble (degrees) |
+| `ariaLabel` | `'Typewriter input'` | Accessible name |
 | `onChange(value)` | — | Callback |
 
-**ARIA:** Labelled input. Jitter disabled under reduced-motion.
+**ARIA:** Labelled input. Jitter disabled under reduced-motion. **Value:** the input's text.
 
-### `createPendulumToggle(options)`
+### `createPendulumToggle(options)` ●
 A toggle switch hanging from a bracket. Click to swing it to the other side with physics damping.
 
 | Option | Default | Description |
@@ -200,9 +264,10 @@ A toggle switch hanging from a bracket. Click to swing it to the other side with
 | `initialState` | `false` | Initial on/off state |
 | `damping` | `0.5` | Physics damping factor |
 | `swingTime` | `1.4` | Swing duration (seconds) |
+| `ariaLabel` | `'Pendulum toggle switch'` | Accessible name |
 | `onChange(isOn)` | — | Callback |
 
-**ARIA:** `role="switch"`, `aria-checked`, keyboard: Enter, Space
+**ARIA:** `role="switch"`, `aria-checked`, keyboard: Enter, Space. **Value:** boolean.
 
 ### `createBalloonTooltip(options)`
 A helium balloon tooltip that inflates on hover/focus and sways on a wavy string.
@@ -215,16 +280,17 @@ A helium balloon tooltip that inflates on hover/focus and sways on a wavy string
 
 **ARIA:** `role="tooltip"`, `aria-describedby`. Shows on hover AND focus.
 
-### `createSlimeProgress(options)`
+### `createSlimeProgress(options)` ●
 A progress bar that can melt — viscous slime drips fall off the fill edge.
 
 | Option | Default | Description |
 |---|---|---|
 | `initialProgress` | `35` | Start percentage |
 | `meltDuration` | `1.5` | Drip animation duration (seconds) |
+| `ariaLabel` | `'Slime progress bar'` | Accessible name |
 | `onMeltComplete(pct)` | — | Callback |
 
-**ARIA:** `role="progressbar"`, `aria-valuenow`
+**ARIA:** `role="progressbar"`, `aria-valuenow`. **Value:** number 0-100.
 
 ### `createGrumpyModalTrigger(options)`
 A modal that drops on a spring. Clicking outside to dismiss triggers an angry shake + buzzer.
@@ -238,16 +304,18 @@ A modal that drops on a spring. Clicking outside to dismiss triggers an angry sh
 
 **ARIA:** `role="dialog"`, `aria-modal`, focus trap, Escape triggers shake (not close). Self-contained — no global DOM dependencies.
 
-### `createRatingStars(options)`
+### `createRatingStars(options)` ●
 Star rating where low ratings collapse and fall, five stars trigger confetti.
 
 | Option | Default | Description |
 |---|---|---|
 | `initialRating` | `0` | Initial star count |
 | `confettiCount` | `25` | Confetti pieces on 5-star |
+| `ariaLabel` | `'Rating'` | Accessible name for the group |
+| `starLabel(i)` | `` `${i} star(s)` `` | Per-star accessible label function |
 | `onChange(rating)` | — | Callback |
 
-**ARIA:** `role="radiogroup"`, `role="radio"`, keyboard: Arrow keys, Enter
+**ARIA:** `role="radiogroup"`, `role="radio"`, keyboard: Arrow keys, Enter. **Value:** number 0-5. `setValue` only updates DOM/ARIA — no confetti, no lock, no sound.
 
 ### `createSlinkyAccordion(options)`
 Accordion that bounces open with spring overshoot.
@@ -260,15 +328,16 @@ Accordion that bounces open with spring overshoot.
 
 **ARIA:** `aria-expanded`, `role="region"`, keyboard: Arrow keys, Home, End
 
-### `createRotaryColorPicker(options)`
+### `createRotaryColorPicker(options)` ●
 A vintage rotary dial that selects color palettes with mechanical rotation.
 
 | Option | Default | Description |
 |---|---|---|
 | `palettes` | 4 built-in | Array of palette objects |
+| `ariaLabel` | `'Color palette selector'` | Accessible name |
 | `onDialComplete(palette)` | — | Callback |
 
-**ARIA:** `role="radiogroup"`, `role="radio"`, keyboard: Arrow keys, Enter
+**ARIA:** `role="radiogroup"`, `role="radio"`, keyboard: Arrow keys, Enter. **Value:** selected palette index (`-1` if none yet).
 
 ### `createDrunkLoader(options)`
 A spinner that wobbles, decelerates, and reverses direction like it's had a few.
@@ -288,6 +357,8 @@ Eyes that track your cursor, lock onto your caret while typing, and dilate in sh
 |---|---|---|
 | `trackingSensitivity` | `7` | Pupil travel distance |
 | `shockDuration` | `1500` | Shock animation duration (ms) |
+| `inputAriaLabel` | `'Secret passcode'` | Accessible name for the password input |
+| `revealAriaLabel` | `'Reveal passcode'` | Accessible name for the reveal button |
 
 **ARIA:** Input with `aria-label`, reveal button with `aria-pressed`. Eyes are `aria-hidden`.
 
@@ -298,6 +369,7 @@ Drag a file onto the slingshot, stretch the band, and catapult-launch it.
 |---|---|---|
 | `bandWidth` | `4` | Elastic band width (px) |
 | `launchSpeed` | `0.65` | Launch velocity |
+| `ariaLabel` | `'Upload file by dragging or clicking'` | Accessible name |
 
 **ARIA:** `role="button"`, keyboard: Enter, Space. Touch-friendly.
 
@@ -311,16 +383,106 @@ A button that stretches toward your cursor like magnetic putty, with a proximity
 
 **ARIA:** Standard button. Disabled under reduced-motion.
 
-### `createWobblyCheckbox(options)`
+### `createWobblyCheckbox(options)` ●
 A hand-drawn checkbox that jiggles when checked and draws a shaky tick mark.
 
 | Option | Default | Description |
 |---|---|---|
-| `labelText` | `'Indie Cinema Mode'` | Label text |
+| `labelText` | `'Indie Cinema Mode'` | Visible label text |
+| `ariaLabel` | defaults to `labelText` | Accessible name (independent of the visible label) |
 | `isJitterEnabled` | `true` | Toggle jiggle on check |
 | `onChange(isChecked)` | — | Callback |
 
-**ARIA:** `role="checkbox"`, `aria-checked`, keyboard: Enter, Space
+**ARIA:** `role="checkbox"`, `aria-checked`, keyboard: Enter, Space. **Value:** boolean.
+
+### `createWobblyRadioGroup(options)` ●
+A segmented radio group with a spring-animated selection indicator that slides between options.
+
+| Option | Default | Description |
+|---|---|---|
+| `items` | preset list | Radio option labels |
+| `initialIndex` | `0` | Initially-selected item index |
+| `ariaLabel` | `'Selection'` | Accessible name for the group |
+| `onChange(selected)` | — | Callback with the selected item's label |
+
+**ARIA:** `role="radiogroup"`, `role="radio"`, keyboard: Arrow keys, Home, End. **Value:** selected item's label (`setValue` accepts a label or an index).
+
+### `createSpringyTabs(options)` ●
+A tab interface with a spring-animated underline indicator and gentle panel transitions.
+
+| Option | Default | Description |
+|---|---|---|
+| `tabs` | preset list | Array of `{ label, content }` |
+| `activeIndex` | `0` | Initially-active tab index |
+| `springBounciness` | `1.2` | Spring overshoot factor |
+| `onChange(tab)` | — | Callback with the newly-active `{ label, content }` |
+
+**ARIA:** `role="tablist"`/`role="tab"`/`role="tabpanel"`, keyboard: Arrow keys. **Value:** active tab index (note this differs from `onChange`, which emits the full tab object).
+
+### `createGravityToast(options)`
+Toast notifications that drop in with gravity settling and slide out on dismiss. Auto-expiring with close button.
+
+| Option | Default | Description |
+|---|---|---|
+| `buttonText` | `'Show Toast'` | Trigger button label |
+| `defaultMessage` | `'Something happened'` | Fallback toast message |
+| `messages` | preset list | Messages cycled through on each trigger click |
+| `maxVisible` | `3` | Max toasts shown at once (oldest evicted) |
+| `duration` | `3000` | Auto-dismiss delay (ms) |
+| `dismissAriaLabel` | `'Dismiss notification'` | Accessible name for each toast's close button |
+
+**ARIA:** `role="alert"`, `aria-live="assertive"` on each toast.
+
+### `createWobblySwitch(options)` ●
+An iOS-style toggle switch with spring overshoot on the thumb. Keyboard accessible with ARIA switch role.
+
+| Option | Default | Description |
+|---|---|---|
+| `labelText` | `'Enable Physics'` | Visible label text |
+| `ariaLabel` | defaults to `labelText` | Accessible name |
+| `initialState` | `false` | Initial on/off state |
+| `springPower` | `1.3` | Thumb overshoot factor |
+| `onChange(isOn)` | — | Callback |
+
+**ARIA:** `role="switch"`, `aria-checked`, keyboard: Enter, Space. **Value:** boolean.
+
+### `createRippleButton(options)`
+A button with a material-style ripple effect that originates from the click point. Haptic clack on press.
+
+| Option | Default | Description |
+|---|---|---|
+| `label` | `'Press Me'` | Visible button text |
+| `ariaLabel` | falls back to `label` | Accessible name override |
+| `rippleColor` | theme accent | CSS color for the ripple |
+| `maxRipples` | `1` | Max concurrent ripples |
+| `onClick()` | — | Callback |
+
+**ARIA:** Standard button semantics.
+
+### `createMagneticNav(options)`
+A navigation bar with magnetic cursor attraction and a sliding active indicator. Keyboard navigable.
+
+| Option | Default | Description |
+|---|---|---|
+| `label` | `'Main navigation'` | Accessible name for the nav landmark |
+| `items` | preset list | Nav item labels |
+| `activeIndex` | `0` | Initially active item index |
+| `magneticRange` | `50` | Pointer distance (px) at which items start pulling toward the cursor |
+| `pullStrength` | `0.2` | How strongly items translate toward the cursor (0-1) |
+| `onChange(item)` | — | Callback with the newly active item's label |
+
+**ARIA:** `<nav>` landmark, keyboard: Arrow keys, Home, End.
+
+### `createElasticDragList(options)`
+A reorderable list with drag-and-drop. Items have elastic visual feedback. Alt+Arrow keys for keyboard reordering.
+
+| Option | Default | Description |
+|---|---|---|
+| `items` | preset list | Array of `{ label }` |
+| `ariaLabel` | `'Reorderable list'` | Accessible name for the list |
+| `onChange(order)` | — | Callback with the new label order |
+
+**ARIA:** `role="list"`, keyboard: Alt+Arrow to reorder, Tab to navigate.
 
 ---
 
@@ -334,20 +496,28 @@ import {
   RatingStars, SlinkyAccordion, DrunkLoader,
   SlimeProgress, GrumpyModalTrigger, SuspiciousEyes,
   SlingshotUpload, MagneticButton, TypewriterInput,
-  BalloonTooltip, RotaryColorPicker
+  BalloonTooltip, RotaryColorPicker, WobblyRadioGroup,
+  SpringyTabs, GravityToast, WobblySwitch, RippleButton,
+  MagneticNav, ElasticDragList,
 } from 'winky-wonky-react';
 
 function App() {
   return (
     <>
+      {/* Uncontrolled — just an initial value */}
       <TiltSlider initialValue={50} onChange={(v) => console.log(v)} />
-      <WobblyCheckbox labelText="Accept wobbliness" />
+
+      {/* Controlled — `value` stays in sync with your state */}
+      <WobblyCheckbox value={accepted} onChange={setAccepted} labelText="Accept wobbliness" />
+
       <RatingStars initialRating={3} />
       <DrunkLoader />
     </>
   );
 }
 ```
+
+Every wrapper component accepts the same options as its vanilla-JS factory, plus an optional `value` prop for value-bearing components (see the **●** components above) — passing `value` makes it a controlled component: an internal effect calls the instance's `setValue()` whenever `value` changes, which updates the DOM without ever re-invoking your `onChange`.
 
 ---
 

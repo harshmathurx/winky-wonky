@@ -1,0 +1,56 @@
+/* 24. Elastic Drag List */
+.winky-elastic-list-container {
+  width: 260px;
+}
+
+.winky-elastic-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.winky-elastic-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--winky-bg-surface);
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius-sm);
+  cursor: grab;
+  transition: border-color 0.15s, transform 0.15s var(--winky-gentle-spring);
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--winky-text-primary);
+}
+
+.winky-elastic-list-item:hover {
+  border-color: var(--winky-border-strong);
+}
+
+.winky-elastic-list-item:active {
+  cursor: grabbing;
+}
+
+.winky-elastic-list-item.winky-dragging {
+  opacity: 0.4;
+  border-color: var(--winky-accent-color);
+}
+
+.winky-elastic-list-item.winky-drag-over {
+  border-color: var(--winky-accent-color);
+  box-shadow: var(--winky-box-shadow-glow);
+  transform: scale(1.02);
+}
+
+.winky-elastic-list-handle {
+  color: var(--winky-text-muted);
+  font-size: 1rem;
+  cursor: grab;
+  user-select: none;
+}
+
+.winky-elastic-list-label {
+  flex: 1;
+}

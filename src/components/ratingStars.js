@@ -1,18 +1,47 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, onKeyActivation, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} RatingStarsOptions
+ * @property {number} [initialRating=0] - Starting rating, 0-5.
+ * @property {number} [confettiCount=25] - Confetti piece count on a 5-star pick.
+ * @property {string} [ariaLabel='Rating'] - Accessible name for the radiogroup.
+ * @property {(i: number) => string} [starLabel] - Per-star accessible label,
+ *   given the 1-based star index. Defaults to "N star(s)".
+ * @property {(rating: number) => void} [onChange] - Called with the new
+ *   rating whenever it changes from user interaction (never from `setValue`).
+ */
+
+/**
+ * @typedef {Object} RatingStarsInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => number} getValue - Current rating (0-5).
+ * @property {(value: number) => void} setValue - Programmatically set the
+ *   rating. Updates DOM/ARIA only — no confetti, no lock, no `onChange`.
+ * @property {() => void} destroy
+ * @property {{confettiCount: number}} config - Live-mutable passive knob.
+ */
+
+/**
+ * Creates a 5-star rating control. Hovering previews, clicking locks in a
+ * rating; a 5-star pick celebrates with confetti, a 1-star pick self-resets.
+ * @param {RatingStarsOptions} [options]
+ * @returns {RatingStarsInstance}
+ */
 export function createRatingStars(options = {}) {
   const container = document.createElement('div');
-  container.className = 'rating-stars-container';
+  container.className = 'winky-rating-stars-container';
   container.style.flexDirection = 'column';
   container.style.alignItems = 'center';
   container.style.width = '100%';
   container.style.position = 'relative';
 
   const starRow = document.createElement('div');
-  starRow.className = 'rating-stars-container';
+  starRow.className = 'winky-rating-stars-container';
   starRow.setAttribute('role', 'radiogroup');
-  starRow.setAttribute('aria-label', 'Rating');
+  const ariaLabel = options.ariaLabel ?? 'Rating';
+  const starLabel = options.starLabel ?? ((i) => `${i} star${i > 1 ? 's' : ''}`);
+  starRow.setAttribute('aria-label', ariaLabel);
   container.appendChild(starRow);
 
   const confettiCanvas = document.createElement('div');
@@ -27,7 +56,9 @@ export function createRatingStars(options = {}) {
 
   let rating = options.initialRating ?? 0;
   let isLocked = false;
-  let confettiCount = options.confettiCount ?? 25;
+  const config = {
+    confettiCount: options.confettiCount ?? 25,
+  };
   const onChange = options.onChange;
   let reducedMotion = prefersReducedMotion();
   let confettiRAF = null;
@@ -35,11 +66,11 @@ export function createRatingStars(options = {}) {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     const star = document.createElement('span');
-    star.className = 'wonky-star winky-focus-visible';
-    star.textContent = '\u2605';
+    star.className = 'winky-wonky-star winky-focus-visible';
+    star.textContent = '★';
     star.setAttribute('role', 'radio');
     star.setAttribute('aria-checked', rating === i ? 'true' : 'false');
-    star.setAttribute('aria-label', `${i} star${i > 1 ? 's' : ''}`);
+    star.setAttribute('aria-label', starLabel(i));
     star.tabIndex = 0;
     star.dataset.index = i;
     starRow.appendChild(star);
@@ -90,12 +121,12 @@ export function createRatingStars(options = {}) {
       AudioSynth.playTick();
       if (!reducedMotion) {
         stars.forEach((s, idx) => {
-          if (idx > 0) s.classList.add('collapsed');
+          if (idx > 0) s.classList.add('winky-collapsed');
         });
       }
 
       setTimeout(() => {
-        stars.forEach(s => s.classList.remove('collapsed'));
+        stars.forEach(s => s.classList.remove('winky-collapsed'));
         rating = 0;
         highlightStars(0);
         stars.forEach(s => s.setAttribute('aria-checked', 'false'));
@@ -127,8 +158,8 @@ export function createRatingStars(options = {}) {
 
   function highlightStars(count) {
     stars.forEach((star, idx) => {
-      if (idx < count) star.classList.add('active');
-      else star.classList.remove('active');
+      if (idx < count) star.classList.add('winky-active');
+      else star.classList.remove('winky-active');
     });
   }
 
@@ -137,7 +168,7 @@ export function createRatingStars(options = {}) {
     const colors = ['#D8A035', '#E5A9A9', '#7DB3B3', '#F37F30', '#8D5B4C'];
     const pieces = [];
 
-    for (let i = 0; i < confettiCount; i++) {
+    for (let i = 0; i < config.confettiCount; i++) {
       const piece = document.createElement('div');
       piece.style.position = 'absolute';
       piece.style.width = '6px';
@@ -202,27 +233,20 @@ export function createRatingStars(options = {}) {
     }
   });
 
-  container.destroy = () => {
+  function destroy() {
     if (confettiRAF) cancelAnimationFrame(confettiRAF);
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Confetti Density', type: 'range', min: 10, max: 50, step: 5, value: confettiCount, onChange: (v) => { confettiCount = parseInt(v); } }
-    ];
-  };
+  function getValue() {
+    return rating;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createRatingStars } from 'winky-wonky';
+  function setValue(v) {
+    rating = Math.max(0, Math.min(5, Math.round(v)));
+    highlightStars(rating);
+    stars.forEach((s, idx) => s.setAttribute('aria-checked', idx + 1 === rating ? 'true' : 'false'));
+  }
 
-const stars = createRatingStars({
-  initialRating: 3,
-  confettiCount: 30,
-  onChange: (rating) => console.log('Current stars count: ', rating)
-});
-document.body.appendChild(stars);`;
-  };
-
-  return container;
+  return { el: container, getValue, setValue, destroy, config };
 }

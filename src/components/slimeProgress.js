@@ -3,19 +3,19 @@ import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js
 
 export function createSlimeProgress(options = {}) {
   const container = document.createElement('div');
-  container.className = 'slime-progress-container';
+  container.className = 'winky-slime-progress-container';
 
   const track = document.createElement('div');
-  track.className = 'slime-track';
+  track.className = 'winky-slime-track';
   track.setAttribute('role', 'progressbar');
 
   const fill = document.createElement('div');
-  fill.className = 'slime-fill';
+  fill.className = 'winky-slime-fill';
   fill.setAttribute('aria-hidden', 'true');
   track.appendChild(fill);
 
   const dripsContainer = document.createElement('div');
-  dripsContainer.className = 'slime-drips-container';
+  dripsContainer.className = 'winky-slime-drips-container';
   dripsContainer.setAttribute('aria-hidden', 'true');
   track.appendChild(dripsContainer);
 
@@ -26,12 +26,12 @@ export function createSlimeProgress(options = {}) {
   btnRow.style.gap = '0.5rem';
 
   const fillBtn = document.createElement('button');
-  fillBtn.className = 'slime-btn winky-focus-visible';
+  fillBtn.className = 'winky-slime-btn winky-focus-visible';
   fillBtn.textContent = 'Refill';
   btnRow.appendChild(fillBtn);
 
   const meltBtn = document.createElement('button');
-  meltBtn.className = 'slime-btn winky-focus-visible';
+  meltBtn.className = 'winky-slime-btn winky-focus-visible';
   meltBtn.textContent = 'Melt Progress';
   meltBtn.style.backgroundColor = 'var(--winky-accent-teal)';
   meltBtn.style.color = '#fff';
@@ -40,8 +40,11 @@ export function createSlimeProgress(options = {}) {
   container.appendChild(btnRow);
 
   let progress = options.initialProgress ?? 35;
-  let meltDuration = options.meltDuration ?? 1.5;
+  const config = {
+    meltDuration: options.meltDuration ?? 1.5,
+  };
   const onMeltComplete = options.onMeltComplete;
+  const ariaLabel = options.ariaLabel ?? 'Slime progress bar';
   let reducedMotion = prefersReducedMotion();
 
   setAria(track, {
@@ -49,10 +52,10 @@ export function createSlimeProgress(options = {}) {
     'valuemax': '100',
     'valuenow': String(Math.round(progress)),
     'valuetext': `${Math.round(progress)}%`,
-    'label': 'Slime progress bar',
+    'label': ariaLabel,
   });
 
-  function setProgress(pct) {
+  function applyProgress(pct) {
     progress = Math.max(0, Math.min(100, pct));
     fill.style.width = `${progress}%`;
     track.setAttribute('aria-valuenow', String(Math.round(progress)));
@@ -62,7 +65,7 @@ export function createSlimeProgress(options = {}) {
   function triggerMelt() {
     if (progress <= 5) return;
     if (reducedMotion) {
-      setProgress(0);
+      applyProgress(0);
       if (onMeltComplete) onMeltComplete(0);
       return;
     }
@@ -78,9 +81,9 @@ export function createSlimeProgress(options = {}) {
       const leftOffset = Math.random() * (filledWidthPx - 15) + 5;
 
       const drip = document.createElement('div');
-      drip.className = 'slime-drip';
+      drip.className = 'winky-slime-drip';
       drip.style.left = `${leftOffset}px`;
-      drip.style.animationDuration = `${meltDuration}s`;
+      drip.style.animationDuration = `${config.meltDuration}s`;
 
       const w = Math.random() * 6 + 6;
       drip.style.width = `${w}px`;
@@ -88,7 +91,7 @@ export function createSlimeProgress(options = {}) {
       dripsContainer.appendChild(drip);
 
       setTimeout(() => {
-        drip.classList.add('dripping');
+        drip.classList.add('winky-dripping');
         AudioSynth.playTick();
       }, i * 220);
 
@@ -103,9 +106,9 @@ export function createSlimeProgress(options = {}) {
 
   fillBtn.addEventListener('click', () => {
     AudioSynth.playClack();
-    setProgress(0);
+    applyProgress(0);
     setTimeout(() => {
-      setProgress(Math.floor(Math.random() * 50) + 40);
+      applyProgress(Math.floor(Math.random() * 50) + 40);
     }, 150);
   });
 
@@ -118,29 +121,19 @@ export function createSlimeProgress(options = {}) {
     reducedMotion = prefersReducedMotion();
   });
 
-  setProgress(progress);
+  applyProgress(progress);
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Viscosity (s)', type: 'range', min: 0.8, max: 2.5, step: 0.1, value: meltDuration, onChange: (v) => { meltDuration = parseFloat(v); } },
-      { label: 'Current Fill %', type: 'range', min: 10, max: 100, step: 5, value: progress, onChange: (v) => { setProgress(parseInt(v)); } }
-    ];
-  };
+  function getValue() {
+    return Math.round(progress);
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createSlimeProgress } from 'winky-wonky';
+  function setValue(v) {
+    applyProgress(v);
+  }
 
-const loader = createSlimeProgress({
-  initialProgress: 60,
-  meltDuration: 1.2,
-  onMeltComplete: (pct) => console.log('Slime melt finished on value: ', pct)
-});
-document.body.appendChild(loader);`;
-  };
-
-  return container;
+  return { el: container, getValue, setValue, destroy, config };
 }

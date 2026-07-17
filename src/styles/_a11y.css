@@ -1,0 +1,45 @@
+/* ==========================================
+   ACCESSIBILITY: REDUCED MOTION & POINTER (component styles)
+   Playground-only reduced-motion rules (the global `*` reset, hero/theme
+   elements) live in src/playground/playground.css, not here — this file
+   ships with the library.
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .winky-balloon-tooltip,
+  .winky-drunk-loader-spinner,
+  .winky-toggle-arm.winky-swinging,
+  .winky-seesaw-slider-track,
+  .winky-wave-slider-knob.winky-jiggling,
+  .winky-btn-squash:hover,
+  .winky-wonky-star:hover,
+  .winky-slime-drip.winky-dripping,
+  .winky-grumpy-modal-box,
+  .winky-grumpy-modal-box.winky-shaking,
+  .winky-projected-char {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .winky-mischievous-btn.winky-btn-dodge {
+    transform: none !important;
+  }
+
+  .winky-magnetic-btn {
+    transform: none !important;
+  }
+
+  .winky-slime-drips-container {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .winky-seesaw-slider-knob,
+  .winky-wave-slider-knob,
+  .winky-toggle-arm,
+  .winky-rotary-wheel,
+  .winky-elastic-list-item {
+    touch-action: none;
+  }
+}

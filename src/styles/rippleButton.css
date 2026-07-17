@@ -1,0 +1,48 @@
+/* 22. Ripple Button */
+.winky-ripple-btn-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.winky-ripple-btn {
+  position: relative;
+  padding: 0.65rem 1.6rem;
+  font-family: var(--winky-font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--winky-accent-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--winky-border-radius-sm);
+  cursor: pointer;
+  overflow: hidden;
+  transition: var(--winky-transition);
+  box-shadow: var(--winky-box-shadow-glow);
+}
+
+.winky-ripple-btn:hover {
+  background: var(--winky-accent-alt);
+}
+
+.winky-ripple-btn:active {
+  transform: scale(0.97);
+}
+
+.winky-ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  pointer-events: none;
+}
+
+.winky-ripple-effect.winky-expanding {
+  animation: winky-ripple-expand 0.5s ease-out forwards;
+}
+
+@keyframes winky-ripple-expand {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 0; }
+}
+

@@ -3,26 +3,34 @@ import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js
 
 export function createMischievousButtons(options = {}) {
   const container = document.createElement('div');
-  container.className = 'button-grid';
+  container.className = 'winky-button-grid';
 
-  let dodgePower = options.dodgePower ?? 0.8;
-  let maxDodgeRange = options.maxDodgeRange ?? 75;
-  let isDodgeEnabled = options.isDodgeEnabled ?? true;
+  const config = {
+    dodgePower: options.dodgePower ?? 0.8,
+    maxDodgeRange: options.maxDodgeRange ?? 75,
+    dodgeEnabled: options.isDodgeEnabled ?? true,
+  };
   const onClick = options.onClick;
   let reducedMotion = prefersReducedMotion();
 
   // --- BUTTON 1: DODGE BUTTON ---
   const dodgeBtn = document.createElement('button');
-  dodgeBtn.className = 'mischievous-btn btn-dodge winky-focus-visible';
+  dodgeBtn.className = 'winky-mischievous-btn winky-btn-dodge winky-focus-visible';
   dodgeBtn.textContent = 'Click Me if You Can';
-  dodgeBtn.setAttribute('aria-label', 'Dodge button — try to catch it');
+  dodgeBtn.setAttribute('aria-label', options.dodgeAriaLabel ?? 'Dodge button — try to catch it');
   container.appendChild(dodgeBtn);
 
   let dodgeX = 0;
   let dodgeY = 0;
 
+  function resetDodge() {
+    dodgeX = 0;
+    dodgeY = 0;
+    dodgeBtn.style.transform = 'translate(0, 0)';
+  }
+
   dodgeBtn.addEventListener('pointermove', (e) => {
-    if (!isDodgeEnabled || reducedMotion) return;
+    if (!config.dodgeEnabled || reducedMotion) return;
 
     const rect = dodgeBtn.getBoundingClientRect();
     const btnCenterX = rect.left + rect.width / 2;
@@ -32,9 +40,9 @@ export function createMischievousButtons(options = {}) {
     const dy = e.clientY - btnCenterY;
     const dist = Math.hypot(dx, dy);
 
-    if (dist < maxDodgeRange) {
+    if (dist < config.maxDodgeRange) {
       const angle = Math.atan2(dy, dx);
-      const escapeDist = (maxDodgeRange - dist) * dodgePower * 1.5;
+      const escapeDist = (config.maxDodgeRange - dist) * config.dodgePower * 1.5;
 
       dodgeX -= Math.cos(angle) * escapeDist;
       dodgeY -= Math.sin(angle) * escapeDist;
@@ -49,11 +57,7 @@ export function createMischievousButtons(options = {}) {
   });
 
   dodgeBtn.addEventListener('pointerleave', () => {
-    setTimeout(() => {
-      dodgeX = 0;
-      dodgeY = 0;
-      dodgeBtn.style.transform = 'translate(0, 0)';
-    }, reducedMotion ? 0 : 1500);
+    setTimeout(resetDodge, reducedMotion ? 0 : 1500);
   });
 
   dodgeBtn.addEventListener('click', () => {
@@ -61,16 +65,14 @@ export function createMischievousButtons(options = {}) {
     if (onClick) {
       onClick('dodge');
     }
-    dodgeX = 0;
-    dodgeY = 0;
-    dodgeBtn.style.transform = 'translate(0,0)';
+    resetDodge();
   });
 
   // --- BUTTON 2: SQUASH BUTTON ---
   const squashBtn = document.createElement('button');
-  squashBtn.className = 'mischievous-btn btn-squash winky-focus-visible';
+  squashBtn.className = 'winky-mischievous-btn winky-btn-squash winky-focus-visible';
   squashBtn.textContent = 'Squash & Stretch';
-  squashBtn.setAttribute('aria-label', 'Squash and stretch button');
+  squashBtn.setAttribute('aria-label', options.squashAriaLabel ?? 'Squash and stretch button');
   container.appendChild(squashBtn);
 
   squashBtn.addEventListener('click', () => {
@@ -80,24 +82,24 @@ export function createMischievousButtons(options = {}) {
 
   // --- BUTTON 3: LAZY SHADOW BUTTON ---
   const lazyWrapper = document.createElement('div');
-  lazyWrapper.className = 'btn-lazy-shadow-wrapper';
+  lazyWrapper.className = 'winky-btn-lazy-shadow-wrapper';
 
   const shadow = document.createElement('div');
-  shadow.className = 'btn-lazy-shadow-shadow';
+  shadow.className = 'winky-btn-lazy-shadow-shadow';
   shadow.setAttribute('aria-hidden', 'true');
   lazyWrapper.appendChild(shadow);
 
   const lazyBtn = document.createElement('button');
-  lazyBtn.className = 'mischievous-btn btn-lazy-shadow winky-focus-visible';
+  lazyBtn.className = 'winky-mischievous-btn winky-btn-lazy-shadow winky-focus-visible';
   lazyBtn.textContent = 'Tactile Keypress';
-  lazyBtn.setAttribute('aria-label', 'Tactile button with lazy shadow');
+  lazyBtn.setAttribute('aria-label', options.lazyAriaLabel ?? 'Tactile button with lazy shadow');
   lazyWrapper.appendChild(lazyBtn);
   container.appendChild(lazyWrapper);
 
   lazyBtn.addEventListener('pointerdown', () => {
     AudioSynth.playClack();
     lazyBtn.style.transform = 'translate(4px, 4px)';
-    shadow.classList.remove('catching-up');
+    shadow.classList.remove('winky-catching-up');
     shadow.style.top = '0px';
     shadow.style.left = '0px';
     if (onClick) onClick('lazy-shadow');
@@ -105,14 +107,14 @@ export function createMischievousButtons(options = {}) {
 
   lazyBtn.addEventListener('pointerup', () => {
     lazyBtn.style.transform = 'translate(0px, 0px)';
-    shadow.classList.add('catching-up');
+    shadow.classList.add('winky-catching-up');
     shadow.style.top = '4px';
     shadow.style.left = '4px';
   });
 
   lazyBtn.addEventListener('pointerleave', () => {
     lazyBtn.style.transform = 'translate(0px, 0px)';
-    shadow.classList.add('catching-up');
+    shadow.classList.add('winky-catching-up');
     shadow.style.top = '4px';
     shadow.style.left = '4px';
   });
@@ -120,38 +122,22 @@ export function createMischievousButtons(options = {}) {
   const motionListener = onReducedMotionChange(() => {
     reducedMotion = prefersReducedMotion();
     if (reducedMotion) {
-      dodgeX = 0;
-      dodgeY = 0;
-      dodgeBtn.style.transform = 'translate(0,0)';
+      resetDodge();
     }
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Enable Dodge', type: 'checkbox', value: isDodgeEnabled, onChange: (v) => {
-        isDodgeEnabled = v;
-        if (!v) { dodgeX = 0; dodgeY = 0; dodgeBtn.style.transform = 'translate(0,0)'; }
-      }},
-      { label: 'Dodge Evasion', type: 'range', min: 0.2, max: 1.0, step: 0.1, value: dodgePower, onChange: (v) => { dodgePower = parseFloat(v); } },
-      { label: 'Dodge Range (px)', type: 'range', min: 40, max: 120, step: 5, value: maxDodgeRange, onChange: (v) => { maxDodgeRange = parseInt(v); } }
-    ];
-  };
+  function setOptions(partial = {}) {
+    if (partial.dodgeEnabled != null) {
+      config.dodgeEnabled = partial.dodgeEnabled;
+      if (!config.dodgeEnabled) resetDodge();
+    }
+    if (partial.dodgePower != null) config.dodgePower = partial.dodgePower;
+    if (partial.maxDodgeRange != null) config.maxDodgeRange = partial.maxDodgeRange;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createMischievousButtons } from 'winky-wonky';
-
-const buttons = createMischievousButtons({
-  isDodgeEnabled: true,
-  dodgePower: 0.8,
-  maxDodgeRange: 75,
-  onClick: (type) => console.log('Clicked button of type: ', type)
-});
-document.body.appendChild(buttons);`;
-  };
-
-  return container;
+  return { el: container, destroy, config, setOptions };
 }

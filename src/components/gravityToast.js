@@ -1,53 +1,83 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} GravityToastOptions
+ * @property {string} [buttonText='Show Toast'] - Trigger button label.
+ * @property {string} [defaultMessage='Something happened'] - Fallback toast message.
+ * @property {string[]} [messages] - Messages cycled through on each trigger click.
+ * @property {number} [maxVisible=3] - Max toasts shown at once (oldest evicted).
+ * @property {number} [duration=3000] - Auto-dismiss delay in ms.
+ * @property {string} [dismissAriaLabel='Dismiss notification'] - Accessible name for each toast's close button.
+ */
+
+/**
+ * @typedef {Object} GravityToastInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => void} destroy - Clears pending dismiss timers and listeners.
+ * @property {{duration: number, maxVisible: number}} config - Live-mutable
+ *   secondary knobs (used by the playground's tuning panel).
+ */
+
+/**
+ * Creates a toast-notification trigger. Toasts drop in with a gravity
+ * settle, auto-dismiss after `duration`, and can be closed manually.
+ * @param {GravityToastOptions} [options]
+ * @returns {GravityToastInstance}
+ */
 export function createGravityToast(options = {}) {
   const container = document.createElement('div');
-  container.className = 'gravity-toast-container';
+  container.className = 'winky-gravity-toast-container';
 
   const triggerBtn = document.createElement('button');
-  triggerBtn.className = 'gravity-toast-trigger winky-focus-visible';
+  triggerBtn.className = 'winky-gravity-toast-trigger winky-focus-visible';
   triggerBtn.textContent = options.buttonText ?? 'Show Toast';
   container.appendChild(triggerBtn);
 
   let toastCounter = 0;
-  let maxVisible = options.maxVisible ?? 3;
-  let duration = options.duration ?? 3000;
+  const config = {
+    maxVisible: options.maxVisible ?? 3,
+    duration: options.duration ?? 3000,
+  };
   let reducedMotion = prefersReducedMotion();
+  const dismissAriaLabel = options.dismissAriaLabel ?? 'Dismiss notification';
 
   const activeToasts = [];
+  // DOM nodes shouldn't carry private state as expando properties — track
+  // each toast's pending auto-dismiss timer here instead of `toast._timer`.
+  const toastTimers = new WeakMap();
 
   function showToast(message) {
-    while (activeToasts.length >= maxVisible) {
+    while (activeToasts.length >= config.maxVisible) {
       const oldest = activeToasts.shift();
-      if (oldest)       removeToast(oldest);
+      if (oldest) removeToast(oldest);
     }
 
     const toast = document.createElement('div');
-    toast.className = 'gravity-toast';
+    toast.className = 'winky-gravity-toast';
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
 
     const msg = document.createElement('span');
-    msg.className = 'gravity-toast-message';
+    msg.className = 'winky-gravity-toast-message';
     msg.textContent = message ?? options.defaultMessage ?? 'Something happened';
     toast.appendChild(msg);
 
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'gravity-toast-close winky-focus-visible';
-    closeBtn.setAttribute('aria-label', 'Dismiss notification');
-    closeBtn.textContent = '\u00D7';
+    closeBtn.className = 'winky-gravity-toast-close winky-focus-visible';
+    closeBtn.setAttribute('aria-label', dismissAriaLabel);
+    closeBtn.textContent = '×';
     toast.appendChild(closeBtn);
 
     activeToasts.push(toast);
 
     if (reducedMotion) {
-      toast.classList.add('settled');
+      toast.classList.add('winky-settled');
     } else {
-      toast.classList.add('dropping');
+      toast.classList.add('winky-dropping');
       setTimeout(() => {
-        toast.classList.remove('dropping');
-        toast.classList.add('settled');
+        toast.classList.remove('winky-dropping');
+        toast.classList.add('winky-settled');
         AudioSynth.playTick();
       }, 50);
     }
@@ -56,13 +86,15 @@ export function createGravityToast(options = {}) {
 
     container.appendChild(toast);
 
-    const timer = setTimeout(() => removeToast(toast), duration);
-    toast._timer = timer;
+    const timer = setTimeout(() => removeToast(toast), config.duration);
+    toastTimers.set(toast, timer);
   }
 
   function removeToast(toast) {
     if (!toast.parentNode) return;
-    if (toast._timer) clearTimeout(toast._timer);
+    const timer = toastTimers.get(toast);
+    if (timer) clearTimeout(timer);
+    toastTimers.delete(toast);
 
     const idx = activeToasts.indexOf(toast);
     if (idx !== -1) activeToasts.splice(idx, 1);
@@ -70,7 +102,7 @@ export function createGravityToast(options = {}) {
     if (reducedMotion) {
       toast.remove();
     } else {
-      toast.classList.add('leaving');
+      toast.classList.add('winky-leaving');
       setTimeout(() => toast.remove(), 300);
     }
   }
@@ -91,28 +123,14 @@ export function createGravityToast(options = {}) {
     reducedMotion = prefersReducedMotion();
   });
 
-  container.destroy = () => {
-    activeToasts.forEach(t => { if (t._timer) clearTimeout(t._timer); });
+  function destroy() {
+    activeToasts.forEach((t) => {
+      const timer = toastTimers.get(t);
+      if (timer) clearTimeout(timer);
+      toastTimers.delete(t);
+    });
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Duration (ms)', type: 'range', min: 1000, max: 6000, step: 500, value: duration, onChange: (v) => { duration = parseInt(v); } },
-      { label: 'Max Visible', type: 'range', min: 1, max: 5, step: 1, value: maxVisible, onChange: (v) => { maxVisible = parseInt(v); } }
-    ];
-  };
-
-  container.getCodeSnippet = () => {
-    return `import { createGravityToast } from 'winky-wonky';
-
-const toaster = createGravityToast({
-  buttonText: 'Notify',
-  duration: 3000,
-  messages: ['Saved!', 'Synced!', 'Done!']
-});
-document.body.appendChild(toaster);`;
-  };
-
-  return container;
+  return { el: container, destroy, config };
 }

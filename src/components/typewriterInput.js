@@ -3,27 +3,29 @@ import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js
 
 export function createTypewriterInput(options = {}) {
   const container = document.createElement('div');
-  container.className = 'typewriter-wrapper';
+  container.className = 'winky-typewriter-wrapper';
 
   const projectionBoard = document.createElement('div');
-  projectionBoard.className = 'projection-board';
+  projectionBoard.className = 'winky-projection-board';
   projectionBoard.setAttribute('aria-hidden', 'true');
   container.appendChild(projectionBoard);
 
   const inputContainer = document.createElement('div');
-  inputContainer.className = 'quill-input-container';
+  inputContainer.className = 'winky-quill-input-container';
 
   const input = document.createElement('input');
   input.type = 'text';
-  input.className = 'quill-input winky-focus-visible';
+  input.className = 'winky-quill-input winky-focus-visible';
   input.placeholder = options.placeholder ?? 'Type something peculiar...';
   input.setAttribute('aria-label', options.ariaLabel ?? 'Typewriter input');
   inputContainer.appendChild(input);
 
   container.appendChild(inputContainer);
 
-  let jitterStrength = options.jitterStrength ?? 3;
-  let maxWobbleRotation = options.maxWobbleRotation ?? 12;
+  const config = {
+    jitterStrength: options.jitterStrength ?? 3,
+    maxWobbleRotation: options.maxWobbleRotation ?? 12,
+  };
   const onChange = options.onChange;
   let lastValue = '';
   let reducedMotion = prefersReducedMotion();
@@ -32,13 +34,13 @@ export function createTypewriterInput(options = {}) {
     projectionBoard.replaceChildren();
 
     for (let i = 0; i < text.length; i++) {
-      const char = text[i] === ' ' ? '\u00A0' : text[i];
+      const char = text[i] === ' ' ? ' ' : text[i];
       const charSpan = document.createElement('span');
-      charSpan.className = 'projected-char';
+      charSpan.className = 'winky-projected-char';
       charSpan.textContent = char;
 
       if (!reducedMotion) {
-        const randRot = (Math.random() - 0.5) * maxWobbleRotation;
+        const randRot = (Math.random() - 0.5) * config.maxWobbleRotation;
         const randY = (Math.random() - 0.5) * 6;
         charSpan.style.setProperty('--rand-rot', `${randRot}deg`);
         charSpan.style.transform = `translateY(${randY}px) rotate(${randRot}deg)`;
@@ -58,12 +60,12 @@ export function createTypewriterInput(options = {}) {
     }
 
     if (!reducedMotion) {
-      input.classList.remove('jittering');
+      input.classList.remove('winky-jittering');
       void input.offsetWidth;
 
-      const rx = (Math.random() - 0.5) * jitterStrength;
-      const ry = (Math.random() - 0.5) * jitterStrength;
-      const rot = (Math.random() - 0.5) * (jitterStrength * 0.5);
+      const rx = (Math.random() - 0.5) * config.jitterStrength;
+      const ry = (Math.random() - 0.5) * config.jitterStrength;
+      const rot = (Math.random() - 0.5) * (config.jitterStrength * 0.5);
       input.style.transform = `translate(${rx}px, ${ry}px) rotate(${rot}deg)`;
 
       setTimeout(() => {
@@ -87,32 +89,24 @@ export function createTypewriterInput(options = {}) {
     reducedMotion = prefersReducedMotion();
     if (reducedMotion) {
       input.style.transform = 'none';
-      input.classList.remove('jittering');
+      input.classList.remove('winky-jittering');
     }
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Type Shake (px)', type: 'range', min: 0, max: 8, step: 1, value: jitterStrength, onChange: (v) => { jitterStrength = parseInt(v); } },
-      { label: 'Letter Wobble (\u00B0)', type: 'range', min: 2, max: 25, step: 1, value: maxWobbleRotation, onChange: (v) => { maxWobbleRotation = parseInt(v); } }
-    ];
-  };
+  function getValue() {
+    return input.value;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createTypewriterInput } from 'winky-wonky';
+  function setValue(v) {
+    const text = String(v ?? '');
+    input.value = text;
+    lastValue = text;
+    renderProjections(text);
+  }
 
-const input = createTypewriterInput({
-  placeholder: 'Speak to the spirits...',
-  jitterStrength: 4,
-  maxWobbleRotation: 15,
-  onChange: (value) => console.log('Current input: ', value)
-});
-document.body.appendChild(input);`;
-  };
-
-  return container;
+  return { el: container, getValue, setValue, destroy, config };
 }

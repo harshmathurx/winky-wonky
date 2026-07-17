@@ -1,9 +1,33 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SpringyTabsOptions
+ * @property {{label: string, content: string}[]} [tabs] - Tab definitions.
+ * @property {number} [activeIndex=0] - Initially-active tab index.
+ * @property {number} [springBounciness=1.2] - Reserved for future spring tuning.
+ * @property {(tab: {label: string, content: string}) => void} [onChange] -
+ *   Called with the newly-active tab object on user interaction.
+ */
+
+/**
+ * @typedef {Object} SpringyTabsInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => number} getValue - Current active tab index.
+ * @property {(index: number) => void} setValue - Switches the active tab.
+ *   Updates DOM/ARIA; does NOT invoke `onChange`.
+ * @property {() => void} destroy
+ * @property {{springBounciness: number}} config - Live-mutable passive knob.
+ */
+
+/**
+ * Creates a tab interface with a spring-animated underline indicator.
+ * @param {SpringyTabsOptions} [options]
+ * @returns {SpringyTabsInstance}
+ */
 export function createSpringyTabs(options = {}) {
   const container = document.createElement('div');
-  container.className = 'springy-tabs-container';
+  container.className = 'winky-springy-tabs-container';
 
   const tabsData = options.tabs ?? [
     { label: 'Overview', content: 'A panoramic view of the peculiar collection, arranged with symmetrical precision.' },
@@ -12,15 +36,17 @@ export function createSpringyTabs(options = {}) {
   ];
 
   let activeIndex = options.activeIndex ?? 0;
-  let springBounciness = options.springBounciness ?? 1.2;
+  const config = {
+    springBounciness: options.springBounciness ?? 1.2,
+  };
   let reducedMotion = prefersReducedMotion();
 
   const tabList = document.createElement('div');
-  tabList.className = 'springy-tabs-list';
+  tabList.className = 'winky-springy-tabs-list';
   tabList.setAttribute('role', 'tablist');
 
   const indicator = document.createElement('div');
-  indicator.className = 'springy-tabs-indicator';
+  indicator.className = 'winky-springy-tabs-indicator';
   indicator.setAttribute('aria-hidden', 'true');
   tabList.appendChild(indicator);
 
@@ -29,7 +55,7 @@ export function createSpringyTabs(options = {}) {
 
   tabsData.forEach((data, index) => {
     const tab = document.createElement('button');
-    tab.className = 'springy-tab winky-focus-visible';
+    tab.className = 'winky-springy-tab winky-focus-visible';
     tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-selected', index === activeIndex ? 'true' : 'false');
     tab.setAttribute('aria-controls', `winky-tabpanel-${index}`);
@@ -64,7 +90,7 @@ export function createSpringyTabs(options = {}) {
     });
 
     const panel = document.createElement('div');
-    panel.className = 'springy-tab-panel';
+    panel.className = 'winky-springy-tab-panel';
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-labelledby', `winky-tab-${index}`);
     panel.id = `winky-tabpanel-${index}`;
@@ -85,10 +111,12 @@ export function createSpringyTabs(options = {}) {
     indicator.style.width = `${rect.width}px`;
   }
 
-  function selectTab(index) {
+  // silent=true suppresses the tick sound and onChange, used by setValue()
+  // so programmatic tab switches never fire the callback.
+  function selectTab(index, silent = false) {
     if (index === activeIndex) return;
     activeIndex = index;
-    AudioSynth.playTick();
+    if (!silent) AudioSynth.playTick();
 
     tabs.forEach((t, i) => {
       t.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
@@ -98,14 +126,14 @@ export function createSpringyTabs(options = {}) {
     panels.forEach((p, i) => {
       p.style.display = i === activeIndex ? 'block' : 'none';
       if (i === activeIndex && !reducedMotion) {
-        p.classList.remove('springy-enter');
+        p.classList.remove('winky-springy-enter');
         void p.offsetWidth;
-        p.classList.add('springy-enter');
+        p.classList.add('winky-springy-enter');
       }
     });
 
     moveIndicator();
-    if (options.onChange) options.onChange(tabsData[activeIndex]);
+    if (!silent && options.onChange) options.onChange(tabsData[activeIndex]);
   }
 
   requestAnimationFrame(() => {
@@ -117,29 +145,18 @@ export function createSpringyTabs(options = {}) {
     moveIndicator();
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Spring Bounce', type: 'range', min: 1.0, max: 1.6, step: 0.05, value: springBounciness, onChange: (v) => { springBounciness = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return activeIndex;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createSpringyTabs } from 'winky-wonky';
+  function setValue(index) {
+    if (index < 0 || index >= tabs.length) return;
+    selectTab(index, true);
+  }
 
-const tabs = createSpringyTabs({
-  tabs: [
-    { label: 'Tab 1', content: 'Content 1' },
-    { label: 'Tab 2', content: 'Content 2' },
-  ],
-  activeIndex: 0,
-  onChange: (tab) => console.log('Selected tab:', tab.label)
-});
-document.body.appendChild(tabs);`;
-  };
-
-  return container;
+  return { el: container, getValue, setValue, destroy, config };
 }

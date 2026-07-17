@@ -3,15 +3,17 @@ import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
 export function createMagneticButton(options = {}) {
   const wrapper = document.createElement('div');
-  wrapper.className = 'magnetic-btn-wrapper';
+  wrapper.className = 'winky-magnetic-btn-wrapper';
 
   const btn = document.createElement('button');
-  btn.className = 'magnetic-btn winky-focus-visible';
+  btn.className = 'winky-magnetic-btn winky-focus-visible';
   btn.textContent = 'Hold Magnet';
   wrapper.appendChild(btn);
 
-  let magneticRange = options.magneticRange ?? 90;
-  let pullStrength = options.pullStrength ?? 0.45;
+  const config = {
+    magneticRange: options.magneticRange ?? 90,
+    pullStrength: options.pullStrength ?? 0.45,
+  };
   let activeHum = null;
   let reducedMotion = prefersReducedMotion();
 
@@ -26,13 +28,13 @@ export function createMagneticButton(options = {}) {
     const dy = e.clientY - btnCenterY;
     const dist = Math.hypot(dx, dy);
 
-    if (dist < magneticRange) {
+    if (dist < config.magneticRange) {
       if (!activeHum) {
         activeHum = AudioSynth.startHum();
       }
       activeHum.updateVolume(dist);
 
-      const force = (1 - dist / magneticRange) * pullStrength;
+      const force = (1 - dist / config.magneticRange) * config.pullStrength;
       const pullX = dx * force;
       const pullY = dy * force;
 
@@ -83,28 +85,11 @@ export function createMagneticButton(options = {}) {
     }
   });
 
-  wrapper.destroy = () => {
+  function destroy() {
     window.removeEventListener('pointermove', onMouseMove);
     if (activeHum) activeHum.stop();
     motionListener();
-  };
+  }
 
-  wrapper.getControls = () => {
-    return [
-      { label: 'Magnetic Range', type: 'range', min: 50, max: 130, step: 5, value: magneticRange, onChange: (v) => { magneticRange = parseInt(v); } },
-      { label: 'Pull Strength', type: 'range', min: 0.1, max: 0.8, step: 0.05, value: pullStrength, onChange: (v) => { pullStrength = parseFloat(v); } }
-    ];
-  };
-
-  wrapper.getCodeSnippet = () => {
-    return `import { createMagneticButton } from 'winky-wonky';
-
-const btn = createMagneticButton({
-  magneticRange: 100,
-  pullStrength: 0.5
-});
-document.body.appendChild(btn);`;
-  };
-
-  return wrapper;
+  return { el: wrapper, destroy, config };
 }

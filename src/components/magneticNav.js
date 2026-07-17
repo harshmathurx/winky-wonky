@@ -1,36 +1,62 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} MagneticNavOptions
+ * @property {string} [label='Main navigation'] - Accessible name for the nav landmark.
+ * @property {string[]} [items] - Nav item labels.
+ * @property {number} [activeIndex=0] - Initially active item index.
+ * @property {number} [magneticRange=50] - Pointer distance (px) at which items start pulling toward the cursor.
+ * @property {number} [pullStrength=0.2] - How strongly items translate toward the cursor (0-1).
+ * @property {(item: string) => void} [onChange] - Called with the newly active item's label.
+ */
+
+/**
+ * @typedef {Object} MagneticNavInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => void} destroy - Removes listeners.
+ * @property {{magneticRange: number, pullStrength: number}} config -
+ *   Live-mutable secondary knobs (used by the playground's tuning panel).
+ */
+
+/**
+ * Creates a navigation bar with magnetic cursor attraction on each item and
+ * a sliding active-item indicator. Keyboard navigable (arrows/Home/End).
+ * @param {MagneticNavOptions} [options]
+ * @returns {MagneticNavInstance}
+ */
 export function createMagneticNav(options = {}) {
   const container = document.createElement('nav');
-  container.className = 'magnetic-nav-container';
+  container.className = 'winky-magnetic-nav-container';
   container.setAttribute('role', 'navigation');
   container.setAttribute('aria-label', options.label ?? 'Main navigation');
 
   const items = options.items ?? ['Home', 'Discover', 'Collection', 'About'];
   let activeIndex = options.activeIndex ?? 0;
-  let magneticRange = options.magneticRange ?? 50;
-  let pullStrength = options.pullStrength ?? 0.2;
+  const config = {
+    magneticRange: options.magneticRange ?? 50,
+    pullStrength: options.pullStrength ?? 0.2,
+  };
   const onChange = options.onChange;
   let reducedMotion = prefersReducedMotion();
 
   const indicator = document.createElement('div');
-  indicator.className = 'magnetic-nav-indicator';
+  indicator.className = 'winky-magnetic-nav-indicator';
   indicator.setAttribute('aria-hidden', 'true');
   container.appendChild(indicator);
 
   const navList = document.createElement('ul');
-  navList.className = 'magnetic-nav-list';
+  navList.className = 'winky-magnetic-nav-list';
   navList.setAttribute('role', 'list');
 
   const navItems = [];
 
   items.forEach((label, index) => {
     const li = document.createElement('li');
-    li.className = 'magnetic-nav-item';
+    li.className = 'winky-magnetic-nav-item';
 
     const link = document.createElement('button');
-    link.className = 'magnetic-nav-link winky-focus-visible';
+    link.className = 'winky-magnetic-nav-link winky-focus-visible';
     link.setAttribute('role', 'menuitem');
     link.setAttribute('aria-current', index === activeIndex ? 'page' : 'false');
     link.textContent = label;
@@ -68,8 +94,8 @@ export function createMagneticNav(options = {}) {
         const dy = e.clientY - cy;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < magneticRange) {
-          const force = (1 - dist / magneticRange) * pullStrength;
+        if (dist < config.magneticRange) {
+          const force = (1 - dist / config.magneticRange) * config.pullStrength;
           link.style.transform = `translate(${dx * force}px, ${dy * force}px)`;
         } else {
           link.style.transform = 'none';
@@ -116,28 +142,9 @@ export function createMagneticNav(options = {}) {
     moveIndicator();
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Magnetic Range', type: 'range', min: 20, max: 100, step: 5, value: magneticRange, onChange: (v) => { magneticRange = parseInt(v); } },
-      { label: 'Pull Strength', type: 'range', min: 0.05, max: 0.5, step: 0.05, value: pullStrength, onChange: (v) => { pullStrength = parseFloat(v); } }
-    ];
-  };
-
-  container.getCodeSnippet = () => {
-    return `import { createMagneticNav } from 'winky-wonky';
-
-const nav = createMagneticNav({
-  items: ['Home', 'Products', 'About'],
-  activeIndex: 0,
-  magneticRange: 60,
-  onChange: (item) => console.log('Navigated to:', item)
-});
-document.body.appendChild(nav);`;
-  };
-
-  return container;
+  return { el: container, destroy, config };
 }

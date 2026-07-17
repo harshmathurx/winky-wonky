@@ -1,0 +1,61 @@
+/* 19. Springy Tabs */
+.winky-springy-tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+}
+
+.winky-springy-tabs-list {
+  display: flex;
+  gap: 0;
+  border-bottom: var(--winky-border-style);
+  position: relative;
+  margin-bottom: 0;
+}
+
+.winky-springy-tabs-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--winky-accent-color);
+  transition: transform 0.3s var(--winky-gentle-spring), width 0.3s var(--winky-gentle-spring);
+  box-shadow: 0 0 8px var(--winky-accent-glow);
+}
+
+.winky-springy-tab {
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  border: none;
+  color: var(--winky-text-secondary);
+  font-family: var(--winky-font-sans);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s;
+  position: relative;
+}
+
+.winky-springy-tab:hover {
+  color: var(--winky-text-primary);
+}
+
+.winky-springy-tab[aria-selected="true"] {
+  color: var(--winky-accent-color);
+}
+
+.winky-springy-tab-panel {
+  padding: 0.9rem 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--winky-text-secondary);
+}
+
+.winky-springy-tab-panel.winky-springy-enter {
+  animation: winky-springy-tab-enter 0.3s var(--winky-gentle-spring);
+}
+
+@keyframes winky-springy-tab-enter {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

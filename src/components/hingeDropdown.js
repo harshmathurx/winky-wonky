@@ -3,10 +3,10 @@ import { setAria, makeFocusable } from './utils.js';
 
 export function createHingeDropdown(options = {}) {
   const container = document.createElement('div');
-  container.className = 'hinge-dropdown-container';
+  container.className = 'winky-hinge-dropdown-container';
 
   const trigger = document.createElement('button');
-  trigger.className = 'dropdown-trigger winky-focus-visible';
+  trigger.className = 'winky-dropdown-trigger winky-focus-visible';
 
   const labelSpan = document.createElement('span');
   labelSpan.textContent = options.label ?? 'Select Curiosity';
@@ -14,23 +14,24 @@ export function createHingeDropdown(options = {}) {
 
   const caret = document.createElement('span');
   caret.setAttribute('aria-hidden', 'true');
-  caret.textContent = '\u25BC';
+  caret.textContent = '▼';
   trigger.appendChild(caret);
 
   container.appendChild(trigger);
 
   const menu = document.createElement('ul');
-  menu.className = 'dropdown-menu';
+  menu.className = 'winky-dropdown-menu';
   menu.setAttribute('role', 'listbox');
 
   const menuOptions = options.options ?? ['Clockwork Key', 'Stitched Hat', 'Taxidermy Crow', 'Muted Pastel Brush'];
   const onSelect = options.onSelect;
+  const ariaLabel = options.ariaLabel ?? labelSpan.textContent;
 
   const optionItems = [];
 
   menuOptions.forEach((optText, idx) => {
     const item = document.createElement('li');
-    item.className = 'dropdown-item winky-focus-visible';
+    item.className = 'winky-dropdown-item winky-focus-visible';
     item.setAttribute('role', 'option');
     item.textContent = optText;
     item.tabIndex = -1;
@@ -54,12 +55,14 @@ export function createHingeDropdown(options = {}) {
   setAria(trigger, {
     'haspopup': 'listbox',
     'expanded': 'false',
-    'label': labelSpan.textContent,
+    'label': ariaLabel,
   });
 
   let isOpen = false;
-  let hingeOrigin = options.hingeOrigin ?? 'top left';
-  let swingSpeed = options.swingSpeed ?? 1.8;
+  const config = {
+    hingeOrigin: options.hingeOrigin ?? 'top left',
+    swingSpeed: options.swingSpeed ?? 1.8,
+  };
   let highlightedIndex = -1;
 
   function highlightOption(idx) {
@@ -76,10 +79,10 @@ export function createHingeDropdown(options = {}) {
     isOpen = true;
     AudioSynth.playTick();
 
-    menu.style.transformOrigin = hingeOrigin;
-    menu.style.animation = `hinge-swing ${swingSpeed}s ease-in-out forwards`;
-    menu.classList.add('open');
-    caret.textContent = '\u25B2';
+    menu.style.transformOrigin = config.hingeOrigin;
+    menu.style.animation = `winky-hinge-swing ${config.swingSpeed}s ease-in-out forwards`;
+    menu.classList.add('winky-open');
+    caret.textContent = '▲';
     trigger.setAttribute('aria-expanded', 'true');
 
     if (optionItems.length > 0) {
@@ -89,9 +92,9 @@ export function createHingeDropdown(options = {}) {
 
   function closeMenu() {
     isOpen = false;
-    menu.classList.remove('open');
+    menu.classList.remove('winky-open');
     menu.style.animation = 'none';
-    caret.textContent = '\u25BC';
+    caret.textContent = '▼';
     trigger.setAttribute('aria-expanded', 'false');
     highlightedIndex = -1;
   }
@@ -149,32 +152,28 @@ export function createHingeDropdown(options = {}) {
   };
   document.addEventListener('click', onDocClick);
 
-  container.destroy = () => {
+  function destroy() {
     document.removeEventListener('click', onDocClick);
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Hinge Corner', type: 'select', options: ['top left', 'top right'], value: hingeOrigin, onChange: (v) => {
-        hingeOrigin = v;
-        if (isOpen) { closeMenu(); setTimeout(openMenu, 100); }
-      }},
-      { label: 'Swing Time (s)', type: 'range', min: 1.0, max: 3.5, step: 0.2, value: swingSpeed, onChange: (v) => { swingSpeed = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return labelSpan.textContent;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createHingeDropdown } from 'winky-wonky';
+  function setValue(v) {
+    labelSpan.textContent = v;
+    if (isOpen) closeMenu();
+  }
 
-const menu = createHingeDropdown({
-  label: 'Choose Weapon',
-  options: ['Wooden Mallet', 'Rusty Hanger', 'Clockwork Bomb'],
-  hingeOrigin: 'top left',
-  swingSpeed: 2.0,
-  onSelect: (value) => console.log('Selected option: ', value)
-});
-document.body.appendChild(menu);`;
-  };
+  function setOptions(partial = {}) {
+    if (partial.hingeOrigin != null) {
+      config.hingeOrigin = partial.hingeOrigin;
+      if (isOpen) { closeMenu(); setTimeout(openMenu, 100); }
+    }
+    if (partial.swingSpeed != null) {
+      config.swingSpeed = partial.swingSpeed;
+    }
+  }
 
-  return container;
+  return { el: container, getValue, setValue, destroy, config, setOptions };
 }
