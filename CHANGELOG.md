@@ -63,10 +63,27 @@ record.
 
 ### Added
 
+- **`@winky/core`** — the physics engine extracted as its own headless package:
+  `createSpring` (one damped-spring implementation with `set`/`target`/
+  `onUpdate`/`onRest`, closed-form integration, idle-when-settled rAF),
+  `addPointerDrag`, `AudioSynth` + composable `soundRecipes` (tick/clack/
+  slide/hum), and the reduced-motion/-sound/pointer media helpers. Zero
+  dependencies, SSR-safe, JSDoc-typed, 20 unit tests. `winky-wonky`'s
+  `utils.js`/`audioSynth.js` are now compatibility re-export shims over it,
+  and `TiltSlider` is fully rebuilt on `createSpring` as the flagship proof.
+- Repo converted to **npm workspaces** (`packages/winky-core`,
+  `packages/winky-wonky-react`) with a single root lockfile and a `test:all`
+  script.
+- **Generated TypeScript declarations** for all packages (JSDoc-typed source +
+  `tsc --allowJs --declaration`), wired into `exports.types`, CI, and
+  `prepublishOnly`.
 - Vitest + jsdom test suite (smoke tests for every factory, SSR-safe import test,
   `TiltSlider` rAF/onChange/instance-API tests) and a GitHub Actions CI workflow.
 - `winky-wonky-react` test suite (Vitest + `@testing-library/react`), including a
   controlled-component render test.
+- Package READMEs for `@winky/core` and `winky-wonky-react`; engine-first main
+  README with 1.x → 2.0 migration notes; `docs/ARCHITECTURE.md` rewritten to
+  the post-refactor two-layer architecture.
 
 ## [1.0.0] - 2024-01-01
 

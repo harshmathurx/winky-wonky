@@ -1,8 +1,24 @@
-# Winky-Wonky Design System
+# Winky-Wonky
 
-A whimsical, physics-based, audio-synthesized design system inspired by the aesthetics of Wes Anderson and Tim Burton. It replaces standard rigid UI elements with wobbly buttons, seesawing volume sliders, gravity pendulums, wobbly text fields, and slingshot upload catapults.
+**A physics engine for UI feel — springs, gestures, and synthesized audio — plus 24 components built on it.**
 
-**24 components. Zero dependencies. 100% vanilla JS. Fully accessible.**
+Flat design made every interface feel like the same interface. Winky-Wonky is the argument that UI elements are *objects*: they have weight, resistance, momentum, and they make sounds when you touch them. Inspired by the aesthetics of Wes Anderson and Tim Burton.
+
+It ships as two layers:
+
+- **`@winky/core`** — the engine. One damped-spring implementation (`createSpring`), a unified pointer-gesture layer (`addPointerDrag`), a Web Audio synthesis module (`AudioSynth` + composable `soundRecipes` — no audio files, pure oscillators), and reduced-motion/-sound/pointer helpers. Headless, typed, zero dependencies, SSR-safe. Use it to add feel to the components you already have.
+- **`winky-wonky`** — the component library. 24 accessible, themeable vanilla-JS components (seesaw sliders, pendulum toggles, slingshot uploads, dodging buttons…) built on the core. Framework-agnostic, with React wrappers in `winky-wonky-react`.
+
+```javascript
+import { createSpring, AudioSynth } from '@winky/core';
+
+const spring = createSpring({ stiffness: 170, damping: 14 }); // underdamped = bouncy
+spring.onUpdate((v) => { knob.style.left = `${v}%`; });
+spring.onRest(() => AudioSynth.playTick());
+spring.target(80); // rAF loop runs only while moving — zero idle CPU
+```
+
+**Zero dependencies. 100% vanilla JS. Fully accessible. SSR-safe.**
 
 ---
 
@@ -518,6 +534,43 @@ function App() {
 ```
 
 Every wrapper component accepts the same options as its vanilla-JS factory, plus an optional `value` prop for value-bearing components (see the **●** components above) — passing `value` makes it a controlled component: an internal effect calls the instance's `setValue()` whenever `value` changes, which updates the DOM without ever re-invoking your `onChange`.
+
+---
+
+## Migrating from 1.x to 2.0
+
+2.0 is a breaking release (full detail in [`CHANGELOG.md`](CHANGELOG.md)):
+
+1. **Factories return an instance, not a DOM node.** Change
+   `document.body.appendChild(createTiltSlider(...))` to
+   `document.body.appendChild(createTiltSlider(...).el)`. Use
+   `instance.getValue()` / `instance.setValue(v)` / `instance.destroy()`.
+   `setValue` never fires `onChange`.
+2. **All CSS classes are now `winky-`-prefixed.** If you styled or queried
+   library-internal class names (`.accordion-item`, `.btn-dodge`, …), add the
+   `winky-` prefix. The `--winky-*` CSS variables are unchanged.
+3. **`getControls()` / `getCodeSnippet()` are gone** — they were playground
+   tooling, not library API.
+4. **The physics/gesture/audio primitives moved to `@winky/core`.**
+   `AudioSynth`, `addPointerDrag`, and the media-query helpers are still
+   re-exported from `winky-wonky` for compatibility, but new code should import
+   them from `@winky/core`.
+5. **React wrappers** are unchanged for uncontrolled usage; value-bearing
+   components additionally accept a controlled `value` prop.
+
+---
+
+## Repository Layout
+
+```
+packages/winky-core/        @winky/core — the engine (springs, gestures, audio, media helpers)
+packages/winky-wonky-react/ React wrappers (compiled, controlled-component support)
+src/                        winky-wonky — the component library
+src/playground/             demo-site-only code (never published)
+docs/                       vision, audit, architecture, GTM
+```
+
+npm workspaces: `npm install` at the root sets up everything; `npm run test:all` runs every package's suite.
 
 ---
 

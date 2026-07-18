@@ -364,14 +364,23 @@ indistinguishable from before (manual check); `@winky/core` imports cleanly in N
 
 **Goal:** the repo tells the engine-first story the launch needs.
 
-- [ ] README rewrite: lead with `@winky/core` (springs + gestures + synthesized
+- [x] README rewrite: lead with `@winky/core` (springs + gestures + synthesized
       audio), then the component layer; accurate counts, accurate claims, quick
       starts for vanilla + React, migration notes 1.x → 2.0.
-- [ ] Write `packages/winky-wonky-react/README.md` (currently listed in `files`
-      but missing).
-- [ ] Update `docs/ARCHITECTURE.md` to match the post-refactor reality.
-- [ ] Finalize `CHANGELOG.md` for `2.0.0`; leave version at `2.0.0-alpha.x` —
+      (Engine-first intro + createSpring example, "Migrating from 1.x to 2.0"
+      section, repo-layout section. The component reference and instance-API
+      sections from Phase 3 were kept as-is.)
+- [x] Write `packages/winky-wonky-react/README.md` (currently listed in `files`
+      but missing). (Also wrote `packages/winky-core/README.md` — full API
+      docs for createSpring/addPointerDrag/AudioSynth/soundRecipes/media.)
+- [x] Update `docs/ARCHITECTURE.md` to match the post-refactor reality.
+      (Fully rewritten: two-layer model, per-module core docs, component
+      contracts, CSS/theme/build layout; stale 1.x-era audit content removed
+      and superseded by docs/AUDIT.md.)
+- [x] Finalize `CHANGELOG.md` for `2.0.0`; leave version at `2.0.0-alpha.x` —
       **publishing is the owner's decision, not the agent's.**
+      (Added @winky/core extraction, workspaces, generated types, and docs
+      to the 2.0.0-alpha.0 Added section. Versions remain 2.0.0-alpha.0.)
 
 **Verify:** every command in the READMEs actually works when copy-pasted.
 
