@@ -1,0 +1,53 @@
+{
+  "name": "@winky/core",
+  "version": "2.0.0-alpha.0",
+  "description": "Headless physics engine for winky-wonky: one spring/damper implementation, pointer-drag gestures, synthesized UI audio, and prefers-reduced-motion/-sound/pointer helpers. Zero dependencies, SSR-safe, framework-agnostic.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Harsh Mathur <harshmathurx@gmail.com>",
+  "homepage": "https://github.com/harshmathurx/winky-wonky",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshmathurx/winky-wonky.git",
+    "directory": "packages/winky-core"
+  },
+  "bugs": {
+    "url": "https://github.com/harshmathurx/winky-wonky/issues"
+  },
+  "keywords": [
+    "physics",
+    "spring",
+    "animation",
+    "gestures",
+    "web-audio",
+    "synthesized-audio",
+    "accessibility",
+    "framework-agnostic",
+    "headless"
+  ],
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "dist/types",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "types": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run types"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

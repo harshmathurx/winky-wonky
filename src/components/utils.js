@@ -1,52 +1,26 @@
-function hasMatchMedia() {
-  return typeof window !== 'undefined' && typeof window.matchMedia === 'function';
-}
+// The physics-agnostic pieces that used to live here — the gesture layer
+// (`addPointerDrag`) and the a11y/media helpers (`prefersReducedMotion` and
+// friends) — moved to `@winky/core` in Phase 5 (see docs/AUDIT.md Part 2).
+// Re-exported from here so every one of the 19 not-yet-migrated components'
+// `import { ... } from './utils.js'` keeps working unchanged — `@winky/core`
+// is the single source of truth, this is just a stable local alias.
+export {
+  addPointerDrag,
+  prefersReducedMotion,
+  prefersReducedSound,
+  isCoarsePointer,
+  shouldPlaySound,
+  shouldAnimate,
+  onReducedMotionChange,
+  onReducedSoundChange,
+  onPointerTypeChange,
+} from '@winky/core';
 
-let reducedMotionMQ = null;
-let reducedSoundMQ = null;
-let coarsePointerMQ = null;
-
-function getReducedMotionMQ() {
-  if (!hasMatchMedia()) return null;
-  if (!reducedMotionMQ) reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-  return reducedMotionMQ;
-}
-function getReducedSoundMQ() {
-  if (!hasMatchMedia()) return null;
-  if (!reducedSoundMQ) reducedSoundMQ = window.matchMedia('(prefers-reduced-sound: reduce)');
-  return reducedSoundMQ;
-}
-function getCoarsePointerMQ() {
-  if (!hasMatchMedia()) return null;
-  if (!coarsePointerMQ) coarsePointerMQ = window.matchMedia('(pointer: coarse)');
-  return coarsePointerMQ;
-}
-
-export const prefersReducedMotion = () => getReducedMotionMQ()?.matches ?? false;
-export const prefersReducedSound = () => getReducedSoundMQ()?.matches ?? false;
-export const isCoarsePointer = () => getCoarsePointerMQ()?.matches ?? false;
-
-export const onReducedMotionChange = (cb) => {
-  const mq = getReducedMotionMQ();
-  if (!mq) return () => {};
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
-export const onReducedSoundChange = (cb) => {
-  const mq = getReducedSoundMQ();
-  if (!mq) return () => {};
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
-export const onPointerTypeChange = (cb) => {
-  const mq = getCoarsePointerMQ();
-  if (!mq) return () => {};
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
-
-export const shouldPlaySound = () => !prefersReducedSound();
-export const shouldAnimate = () => !prefersReducedMotion();
+/**
+ * DOM/ARIA helpers that are specific to wiring up winky-wonky's own
+ * components (not part of the headless engine) — these stay here rather
+ * than moving to `@winky/core`.
+ */
 
 export function setAria(el, attrs) {
   for (const [key, value] of Object.entries(attrs)) {
@@ -107,63 +81,5 @@ export function trapFocus(container) {
     release() {
       container.removeEventListener('keydown', onKeyDown);
     }
-  };
-}
-
-/**
- * @typedef {Object} PointerDragHandlers
- * @property {(e: PointerEvent) => void} [onDown] - Called on `pointerdown` on `target`.
- * @property {(e: PointerEvent) => void} [onMove] - Called on `pointermove` on
- *   `captureElement` while dragging.
- * @property {(e: PointerEvent) => void} [onUp] - Called on `pointerup`/`pointercancel`
- *   on `captureElement`.
- * @property {EventTarget} [captureElement=window] - Element that move/up
- *   listeners are attached to (lets dragging continue outside `target`).
- */
-
-/**
- * Wires up a drag gesture: `pointerdown` on `target` starts tracking,
- * `pointermove`/`pointerup`/`pointercancel` on `captureElement` (default
- * `window`) continue/end it.
- * @param {EventTarget} target
- * @param {PointerDragHandlers} [handlers]
- * @returns {() => void} Teardown function that removes all listeners.
- */
-export function addPointerDrag(target, {
-  onDown,
-  onMove,
-  onUp,
-  captureElement = window,
-} = {}) {
-  let isDragging = false;
-
-  function handleDown(e) {
-    isDragging = true;
-    if (onDown) onDown(e);
-    captureElement.addEventListener('pointermove', handleMove);
-    captureElement.addEventListener('pointerup', handleUp);
-    captureElement.addEventListener('pointercancel', handleUp);
-  }
-
-  function handleMove(e) {
-    if (!isDragging) return;
-    if (onMove) onMove(e);
-  }
-
-  function handleUp(e) {
-    isDragging = false;
-    if (onUp) onUp(e);
-    captureElement.removeEventListener('pointermove', handleMove);
-    captureElement.removeEventListener('pointerup', handleUp);
-    captureElement.removeEventListener('pointercancel', handleUp);
-  }
-
-  target.addEventListener('pointerdown', handleDown);
-
-  return () => {
-    target.removeEventListener('pointerdown', handleDown);
-    captureElement.removeEventListener('pointermove', handleMove);
-    captureElement.removeEventListener('pointerup', handleUp);
-    captureElement.removeEventListener('pointercancel', handleUp);
   };
 }

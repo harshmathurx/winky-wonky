@@ -58,6 +58,9 @@
   "sideEffects": [
     "*.css"
   ],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -65,7 +68,11 @@
     "types": "tsc -p tsconfig.json",
     "prepublishOnly": "npm run build:lib && npm run types",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:all": "npm test --workspaces --if-present && npm test"
+  },
+  "dependencies": {
+    "@winky/core": "^2.0.0-alpha.0"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
