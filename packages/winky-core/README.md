@@ -1,4 +1,4 @@
-# @winky/core
+# @winkywonky/core
 
 **The physics engine for UI feel.** One damped-spring implementation, a unified
 pointer-gesture layer, synthesized Web Audio feedback, and accessibility media
@@ -11,7 +11,7 @@ you already have.
 ## Install
 
 ```bash
-npm install @winky/core
+npm install @winkywonky/core
 ```
 
 ## `createSpring(options)`
@@ -23,7 +23,7 @@ react-spring. The internal rAF loop **only runs while the spring is moving**:
 `onRest` guarantees zero idle CPU.
 
 ```javascript
-import { createSpring } from '@winky/core';
+import { createSpring } from '@winkywonky/core';
 
 const spring = createSpring({
   stiffness: 170,  // k — higher = snappier (default 170)
@@ -50,7 +50,7 @@ spring.destroy();     // alias for stop()
 Unified mouse + touch + pen dragging via Pointer Events.
 
 ```javascript
-import { addPointerDrag } from '@winky/core';
+import { addPointerDrag } from '@winkywonky/core';
 
 const remove = addPointerDrag(knob, {
   onDown(e) { spring.stop(); },
@@ -67,7 +67,7 @@ gated behind the first user gesture (browser autoplay policy) and respects
 `prefers-reduced-sound` automatically.
 
 ```javascript
-import { AudioSynth, soundRecipes } from '@winky/core';
+import { AudioSynth, soundRecipes } from '@winkywonky/core';
 
 AudioSynth.playTick();              // notch snap
 AudioSynth.playClack();             // button bottom-out
@@ -90,14 +90,14 @@ import {
   prefersReducedMotion, prefersReducedSound, isCoarsePointer,
   shouldAnimate, shouldPlaySound,
   onReducedMotionChange, onReducedSoundChange, onPointerTypeChange,
-} from '@winky/core';
+} from '@winkywonky/core';
 
 if (shouldAnimate()) spring.target(100);
 const off = onReducedMotionChange(() => { /* re-check and adapt */ });
 ```
 
 All helpers are lazily initialized and safe to import (not call) in Node/SSR —
-`import '@winky/core'` never touches `window` or `document` at module scope.
+`import '@winkywonky/core'` never touches `window` or `document` at module scope.
 
 ## Types
 

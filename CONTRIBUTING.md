@@ -14,7 +14,7 @@ npm workspaces monorepo. The root package.json is private/unpublished
 tooling only — the three published packages live under `packages/`:
 
 - `winky-wonky` (`packages/winky-wonky`) — the 24 vanilla-JS components
-- `@winky/core` (`packages/winky-core`) — the headless physics/gesture/audio engine
+- `@winkywonky/core` (`packages/winky-core`) — the headless physics/gesture/audio engine
 - `winky-wonky-react` (`packages/winky-wonky-react`) — controlled React wrappers
 
 Storybook (`.storybook/`, `stories/`) is dev-only tooling for browsing and
@@ -25,7 +25,7 @@ tuning components live; it is never published. See
 
 1. Branch off `main`, make your change, add/update tests.
 2. If your change affects the published behavior of `winky-wonky`,
-   `@winky/core`, or `winky-wonky-react`, add a changeset:
+   `@winkywonky/core`, or `winky-wonky-react`, add a changeset:
 
    ```bash
    npm run changeset

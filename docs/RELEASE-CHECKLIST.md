@@ -27,11 +27,12 @@ publishes, and only the packages it actually bumped.
 
 - Add an npm [automation
   token](https://docs.npmjs.com/creating-and-viewing-access-tokens) with
-  publish rights on `winky-wonky`, `@winky/core`, and `winky-wonky-react` as
+  publish rights on `winky-wonky`, `@winkywonky/core`, and `winky-wonky-react` as
   the `NPM_TOKEN` repository secret.
-- `@winky/core` publishes under the `@winky` npm org/scope — make sure the
-  token's account has publish access to it (`publishConfig.access: public`
-  is already set, so no paid scope is required, just membership/ownership).
+- `@winkywonky/core` publishes under the `@winkywonky` npm org
+  (https://www.npmjs.com/org/winkywonky) — make sure the token's account is
+  a member with publish access (`publishConfig.access: public` is already
+  set, so no paid scope is required, just membership/ownership).
 - No other secrets are needed; `GITHUB_TOKEN` is provided automatically by
   Actions.
 

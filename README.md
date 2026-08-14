@@ -6,11 +6,11 @@ Flat design made every interface feel like the same interface. Winky-Wonky is th
 
 It ships as two layers:
 
-- **`@winky/core`** — the engine. One damped-spring implementation (`createSpring`), a unified pointer-gesture layer (`addPointerDrag`), a Web Audio synthesis module (`AudioSynth` + composable `soundRecipes` — no audio files, pure oscillators), and reduced-motion/-sound/pointer helpers. Headless, typed, zero dependencies, SSR-safe. Use it to add feel to the components you already have.
+- **`@winkywonky/core`** — the engine. One damped-spring implementation (`createSpring`), a unified pointer-gesture layer (`addPointerDrag`), a Web Audio synthesis module (`AudioSynth` + composable `soundRecipes` — no audio files, pure oscillators), and reduced-motion/-sound/pointer helpers. Headless, typed, zero dependencies, SSR-safe. Use it to add feel to the components you already have.
 - **`winky-wonky`** — the component library. 24 accessible, themeable vanilla-JS components (seesaw sliders, pendulum toggles, slingshot uploads, dodging buttons…) built on the core. Framework-agnostic, with React wrappers in `winky-wonky-react`.
 
 ```javascript
-import { createSpring, AudioSynth } from '@winky/core';
+import { createSpring, AudioSynth } from '@winkywonky/core';
 
 const spring = createSpring({ stiffness: 170, damping: 14 }); // underdamped = bouncy
 spring.onUpdate((v) => { knob.style.left = `${v}%`; });
@@ -558,10 +558,10 @@ Every wrapper component accepts the same options as its vanilla-JS factory, plus
    `winky-` prefix. The `--winky-*` CSS variables are unchanged.
 3. **`getControls()` / `getCodeSnippet()` are gone** — they were playground
    tooling, not library API.
-4. **The physics/gesture/audio primitives moved to `@winky/core`.**
+4. **The physics/gesture/audio primitives moved to `@winkywonky/core`.**
    `AudioSynth`, `addPointerDrag`, and the media-query helpers are still
    re-exported from `winky-wonky` for compatibility, but new code should import
-   them from `@winky/core`.
+   them from `@winkywonky/core`.
 5. **React wrappers** are unchanged for uncontrolled usage; value-bearing
    components additionally accept a controlled `value` prop.
 
@@ -570,7 +570,7 @@ Every wrapper component accepts the same options as its vanilla-JS factory, plus
 ## Repository Layout
 
 ```
-packages/winky-core/        @winky/core — the engine (springs, gestures, audio, media helpers)
+packages/winky-core/        @winkywonky/core — the engine (springs, gestures, audio, media helpers)
 packages/winky-wonky/       winky-wonky — the component library (24 components)
 packages/winky-wonky-react/ React wrappers (compiled, controlled-component support)
 .storybook/, stories/        component gallery/docs (never published) — `npm run storybook`

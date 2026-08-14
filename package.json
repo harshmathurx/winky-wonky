@@ -1,7 +1,7 @@
 {
   "name": "winky-wonky-monorepo",
   "private": true,
-  "description": "Monorepo for winky-wonky, @winky/core, and winky-wonky-react. Not published — see packages/*.",
+  "description": "Monorepo for winky-wonky, @winkywonky/core, and winky-wonky-react. Not published — see packages/*.",
   "type": "module",
   "license": "MIT",
   "author": "Harsh Mathur <harshmathurx@gmail.com>",

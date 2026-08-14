@@ -1,7 +1,7 @@
 # Changesets
 
 This monorepo uses [Changesets](https://github.com/changesets/changesets) to
-version and publish `winky-wonky`, `@winky/core`, and `winky-wonky-react`
+version and publish `winky-wonky`, `@winkywonky/core`, and `winky-wonky-react`
 independently.
 
 ## Workflow
