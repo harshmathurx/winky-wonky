@@ -5,6 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0-alpha.0] - 2026-07-17
+
+Remediation release addressing the full findings list in `docs/AUDIT.md`. Not yet
+published — `2.0.0-alpha.0` is a working version for the `audit/product-and-code-audit`
+branch; publishing is the maintainer's call. See `PLAN.md` for the phased execution
+record.
+
+### Breaking
+
+- **Factories now return an instance object, not a bare DOM node** (audit #6). Every
+  `createX()` returns `{ el, destroy, getValue?, setValue? }` — mount `instance.el`,
+  not `instance` itself. `getValue`/`setValue` are implemented by every value-bearing
+  component (sliders, toggles, checkbox, radio group, rating, tabs, switch, dropdown,
+  input, progress, color picker); `setValue` updates the DOM + ARIA state and never
+  invokes `onChange`, matching the standard controlled-component contract.
+- **All shipped CSS classes are now `winky-`-prefixed** (audit #5), e.g.
+  `.accordion-item` → `.winky-accordion-item`, `.btn-dodge` → `.winky-btn-dodge`,
+  `.seesaw-slider-track` → `.winky-seesaw-slider-track`. Update any code that
+  selected library-internal class names directly.
+- **`getControls()`/`getCodeSnippet()` removed from every component** (audit #4).
+  These were playground-only concerns bolted onto the shipped component API; the
+  playground's tuning panel and code inspector now read from a separate,
+  unpublished registry (`src/playground/registry.js`).
+- **`src/style.css` split** (audit #4/#5). The single 2,622-line file is now
+  `src/winky-wonky.css` (the published aggregate — imports design tokens, shared
+  a11y rules, and one file per component from `src/styles/`) plus a demo-only
+  `src/playground/playground.css` that never ships. The `winky-wonky/style.css`
+  package export now points at the new aggregate — most consumers need no changes.
+- **Several hardcoded ARIA strings became configurable options** (audit #8), e.g.
+  `ariaLabel`, `dismissAriaLabel`, `inputAriaLabel`/`revealAriaLabel`,
+  `dodgeAriaLabel`/`squashAriaLabel`/`lazyAriaLabel`. Existing defaults are
+  unchanged, so this is additive unless you were relying on the old hardcoded text.
+- **`winky-wonky-react` wrappers use `.el` internally** and support a controlled
+  `value` prop for value-bearing components; uncontrolled usage (`initialValue`,
+  `onChange`, etc.) is unchanged.
+- **React peer dependency bumped** to `winky-wonky >=2.0.0-alpha.0`.
+
+### Fixed
+
+- **SSR crash on import** (audit #2) — `window.matchMedia`/`document` access is now
+  lazy-initialized; importing the package in Node (Next.js/Remix/Astro SSR) no
+  longer throws.
+- **Permanent rAF loop + `onChange` spam in `TiltSlider`** (audit #3) — the render
+  loop now idles fully when settled and restarts only on interaction;
+  `onChange` fires at most once per rounded-value change, never from both the
+  render loop and the drag handler simultaneously.
+- **`winky-wonky-react` shipped raw, untranspiled JSX** (audit #1) — now built with
+  Vite lib mode to plain ESM `dist/index.js`.
+- **`toast._timer` expando leak** in `GravityToast` (audit #8) — replaced with a
+  `WeakMap` keyed by the toast element.
+- **README component count** corrected from the claimed 18 to the actual 24
+  (`AudioSynth` and the 5 media-query helpers are separate exports, not counted as
+  "components"); the 7 previously-undocumented exports (`wobblyRadioGroup`,
+  `springyTabs`, `gravityToast`, `wobblySwitch`, `rippleButton`, `magneticNav`,
+  `elasticDragList`) are now documented.
+
+### Added
+
+- **`@winky/core`** — the physics engine extracted as its own headless package:
+  `createSpring` (one damped-spring implementation with `set`/`target`/
+  `onUpdate`/`onRest`, closed-form integration, idle-when-settled rAF),
+  `addPointerDrag`, `AudioSynth` + composable `soundRecipes` (tick/clack/
+  slide/hum), and the reduced-motion/-sound/pointer media helpers. Zero
+  dependencies, SSR-safe, JSDoc-typed, 20 unit tests. `winky-wonky`'s
+  `utils.js`/`audioSynth.js` are now compatibility re-export shims over it,
+  and `TiltSlider` is fully rebuilt on `createSpring` as the flagship proof.
+- Repo converted to **npm workspaces** (`packages/winky-core`,
+  `packages/winky-wonky-react`) with a single root lockfile and a `test:all`
+  script.
+- **Generated TypeScript declarations** for all packages (JSDoc-typed source +
+  `tsc --allowJs --declaration`), wired into `exports.types`, CI, and
+  `prepublishOnly`.
+- Vitest + jsdom test suite (smoke tests for every factory, SSR-safe import test,
+  `TiltSlider` rAF/onChange/instance-API tests) and a GitHub Actions CI workflow.
+- `winky-wonky-react` test suite (Vitest + `@testing-library/react`), including a
+  controlled-component render test.
+- Package READMEs for `@winky/core` and `winky-wonky-react`; engine-first main
+  README with 1.x → 2.0 migration notes; `docs/ARCHITECTURE.md` rewritten to
+  the post-refactor two-layer architecture.
+
 ## [1.0.0] - 2024-01-01
 
 ### Added

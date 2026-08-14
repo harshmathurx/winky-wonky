@@ -1,0 +1,17 @@
+/* 13. Drunk Loader */
+.winky-drunk-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.winky-drunk-loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--winky-border-color);
+  border-top-color: var(--winky-accent-color);
+  border-radius: 50%;
+  transform-origin: center center;
+  position: relative;
+}

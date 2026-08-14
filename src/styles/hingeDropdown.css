@@ -1,0 +1,73 @@
+/* 4. Hinge Dropdown */
+.winky-hinge-dropdown-container {
+  position: relative;
+  width: 200px;
+}
+
+.winky-dropdown-trigger {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius-sm);
+  background: var(--winky-bg-surface);
+  color: var(--winky-text-primary);
+  font-family: var(--winky-font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--winky-transition);
+}
+
+.winky-dropdown-trigger:hover {
+  border-color: var(--winky-accent-color);
+}
+
+.winky-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--winky-bg-glass);
+  backdrop-filter: blur(16px);
+  border: var(--winky-border-style-strong);
+  border-radius: var(--winky-border-radius-sm);
+  list-style: none;
+  z-index: 100;
+  display: none;
+  transform-origin: top left;
+  box-shadow: var(--winky-box-shadow);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.winky-dropdown-menu.winky-open {
+  display: block;
+  animation: winky-hinge-swing 0.6s var(--winky-gentle-spring) forwards;
+}
+
+.winky-dropdown-item {
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.825rem;
+  transition: var(--winky-transition);
+}
+
+.winky-dropdown-item:hover {
+  background: var(--winky-accent-glow);
+  color: var(--winky-accent-color);
+}
+
+.winky-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid var(--winky-border-color);
+}
+
+@keyframes winky-hinge-swing {
+  0% { transform: rotate(-12deg); opacity: 0; }
+  60% { transform: rotate(4deg); opacity: 1; }
+  100% { transform: rotate(0deg); opacity: 1; }
+}

@@ -1,6 +1,49 @@
-import { AudioSynth } from './audioSynth.js';
-import { setAria, makeFocusable, addPointerDrag, prefersReducedMotion, onReducedMotionChange } from './utils.js';
+import { AudioSynth, addPointerDrag, createSpring, prefersReducedMotion, onReducedMotionChange } from '@winky/core';
+import { setAria, makeFocusable } from './utils.js';
 
+/**
+ * @typedef {Object} TiltSliderOptions
+ * @property {number} [initialValue=50] - Starting value, 0-100.
+ * @property {number} [gravity=0.4] - How strongly the knob slides down the
+ *   tilted track once released (0.1-1.5 is a sane range).
+ * @property {number} [maxTilt=15] - Maximum seesaw tilt angle in degrees.
+ * @property {number} [springLag=0.2] - Drag-follow responsiveness (0-1,
+ *   higher = snappier); mapped onto the underlying `@winky/core` spring's
+ *   stiffness at the start of each drag.
+ * @property {string} [ariaLabel='Seesaw volume slider'] - Accessible name for the slider.
+ * @property {(value: number) => void} [onChange] - Called with the rounded
+ *   value whenever it changes from user interaction (never from `setValue`).
+ */
+
+/**
+ * @typedef {Object} TiltSliderInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => number} getValue - Current rounded value (0-100).
+ * @property {(value: number) => void} setValue - Programmatically set the
+ *   value. Updates the DOM and ARIA state; does NOT invoke `onChange`.
+ * @property {() => void} destroy - Cancels the render loop, stops any
+ *   in-flight sound, and removes listeners.
+ * @property {{gravity: number, maxTilt: number, springLag: number}} config -
+ *   Live-mutable secondary physics knobs (used by the playground's tuning
+ *   panel; most consumers just pass options at creation time instead).
+ */
+
+/**
+ * Creates a "seesaw" slider: hovering tilts the track and gravity slides the
+ * knob down-slope; dragging moves it directly.
+ *
+ * Built on `@winky/core`: pointer tracking is `addPointerDrag`, the
+ * drag-follow/release-settle motion is a `createSpring` instance (replacing
+ * the old ad-hoc `value += (target - value) * springLag` lerp), and the
+ * tick/slide sounds and reduced-motion check come from the same core
+ * package. The gravity-down-the-slope behavior stays bespoke — it's a
+ * continuous per-frame force whose direction/magnitude tracks the *current*
+ * hover angle in real time (not a fixed destination), which doesn't fit the
+ * "spring toward a target" shape, so it keeps its own small idle-when-flat
+ * render loop rather than being forced through `createSpring`.
+ * @param {TiltSliderOptions} [options]
+ * @returns {TiltSliderInstance}
+ */
 export function createTiltSlider(options = {}) {
   const wrapper = document.createElement('div');
   wrapper.style.display = 'flex';
@@ -9,22 +52,22 @@ export function createTiltSlider(options = {}) {
   wrapper.style.width = '100%';
 
   const track = document.createElement('div');
-  track.className = 'seesaw-slider-track';
+  track.className = 'winky-seesaw-slider-track';
   track.setAttribute('role', 'slider');
   makeFocusable(track);
   track.classList.add('winky-focus-visible');
 
   const pivot = document.createElement('div');
-  pivot.className = 'seesaw-pivot';
+  pivot.className = 'winky-seesaw-pivot';
   track.appendChild(pivot);
 
   const knob = document.createElement('div');
-  knob.className = 'seesaw-slider-knob';
+  knob.className = 'winky-seesaw-slider-knob';
   knob.setAttribute('aria-hidden', 'true');
   track.appendChild(knob);
 
   const valueDisplay = document.createElement('div');
-  valueDisplay.className = 'seesaw-value';
+  valueDisplay.className = 'winky-seesaw-value';
   valueDisplay.textContent = '50%';
   knob.appendChild(valueDisplay);
 
@@ -33,12 +76,14 @@ export function createTiltSlider(options = {}) {
   let value = options.initialValue ?? 50;
   let angle = 0;
   let isDragging = false;
-  let gravity = options.gravity ?? 0.4;
-  let maxTilt = options.maxTilt ?? 15;
-  let springLag = options.springLag ?? 0.2;
+  const config = {
+    gravity: options.gravity ?? 0.4,
+    maxTilt: options.maxTilt ?? 15,
+    springLag: options.springLag ?? 0.2,
+  };
   const onChange = options.onChange;
+  const ariaLabel = options.ariaLabel ?? 'Seesaw volume slider';
 
-  let targetValue = value;
   let activeSlideSound = null;
   let reducedMotion = prefersReducedMotion();
 
@@ -47,7 +92,7 @@ export function createTiltSlider(options = {}) {
     'valuemax': '100',
     'valuenow': String(Math.round(value)),
     'valuetext': `${Math.round(value)}%`,
-    'label': 'Seesaw volume slider',
+    'label': ariaLabel,
   });
 
   function updateAria() {
@@ -56,16 +101,9 @@ export function createTiltSlider(options = {}) {
     track.setAttribute('aria-valuetext', `${v}%`);
   }
 
-  function updateRender() {
-    if (!isDragging && Math.abs(angle) > 0.5 && !reducedMotion) {
-      const gravityForce = Math.sin(angle * Math.PI / 180) * gravity * 15;
-      value += gravityForce;
-      value = Math.max(0, Math.min(100, value));
-      targetValue = value;
-    } else if (isDragging) {
-      value += (targetValue - value) * springLag;
-    }
-
+  // Paint DOM + ARIA from current `value`/`angle` state. Pure — no physics,
+  // no onChange. Shared by every source of value/angle change.
+  function paint() {
     knob.style.left = `${value}%`;
     const displayVal = Math.round(value);
     valueDisplay.textContent = `${displayVal}%`;
@@ -75,25 +113,104 @@ export function createTiltSlider(options = {}) {
       track.style.transform = `rotate(${angle}deg)`;
     }
 
-    if (onChange && !isDragging) {
-      onChange(displayVal);
-    }
     updateAria();
+  }
 
-    if (activeSlideSound && Math.abs(targetValue - value) > 0.05) {
+  let lastEmittedValue = Math.round(value);
+  function emitChange() {
+    const rounded = Math.round(value);
+    if (rounded === lastEmittedValue) return;
+    lastEmittedValue = rounded;
+    if (onChange) onChange(rounded);
+  }
+
+  // --- One-shot paint scheduler: creation + keyboard steps are instant
+  // value changes (no animation), but still need the DOM update deferred to
+  // a frame so onChange fires from a frame boundary like every other
+  // interaction (keeps the audit's "onChange only from a real change,
+  // exactly once" contract regardless of which path produced the change).
+  let oneShotFrameId = null;
+  function scheduleOneShotPaint() {
+    if (oneShotFrameId != null) return;
+    oneShotFrameId = requestAnimationFrame(() => {
+      oneShotFrameId = null;
+      paint();
+      emitChange();
+    });
+  }
+
+  scheduleOneShotPaint(); // initial paint
+
+  // --- Drag: a fresh spring per drag session, sized from the current
+  // `config.springLag` (so tuning it live takes effect on the next drag).
+  // Rides on `createSpring`'s own idle-when-settled rAF loop — nothing here
+  // schedules frames manually.
+  let dragSpring = null;
+
+  function startDragSpring() {
+    // A previous drag's settle-into-place spring might still be running if
+    // the knob is grabbed again before it finished resting — stop it so it
+    // doesn't keep animating in the background after being orphaned below.
+    if (dragSpring) dragSpring.stop();
+    const stiffness = Math.max(20, config.springLag * 900);
+    const damping = 2 * Math.sqrt(stiffness); // critical: no oscillation while dragging
+    dragSpring = createSpring({ value, stiffness, damping });
+    dragSpring.onUpdate((v) => {
+      value = Math.max(0, Math.min(100, v));
+      paint();
+      emitChange();
+      if (activeSlideSound) {
+        const pitch = 200 + (value / 100) * 400 + Math.abs(angle) * 8;
+        activeSlideSound.update(pitch);
+      }
+    });
+  }
+
+  function stopDragSpring() {
+    if (dragSpring) {
+      dragSpring.stop();
+      dragSpring = null;
+    }
+  }
+
+  // --- Gravity: a continuous per-frame pull whose direction/strength track
+  // the *current* hover angle in real time, independent of new pointer
+  // events. Kept as its own tiny idle-when-flat loop (see file-level doc
+  // comment for why this isn't a `createSpring` target).
+  let gravityFrameId = null;
+
+  function gravityActive() {
+    return !isDragging && !reducedMotion && Math.abs(angle) > 0.5;
+  }
+
+  function gravityTick() {
+    gravityFrameId = null;
+    if (!gravityActive()) return;
+
+    const gravityForce = Math.sin(angle * Math.PI / 180) * config.gravity * 15;
+    value = Math.max(0, Math.min(100, value + gravityForce));
+    paint();
+    emitChange();
+
+    if (activeSlideSound && Math.abs(value) >= 0) {
       const pitch = 200 + (value / 100) * 400 + Math.abs(angle) * 8;
       activeSlideSound.update(pitch);
     }
+
+    scheduleGravityFrame();
   }
 
-  let needsRender = true;
-  function loop() {
-    if (needsRender || isDragging || (!reducedMotion && Math.abs(angle) > 0.5)) {
-      updateRender();
-    }
-    animId = requestAnimationFrame(loop);
+  function scheduleGravityFrame() {
+    if (gravityFrameId != null || !gravityActive()) return;
+    gravityFrameId = requestAnimationFrame(gravityTick);
   }
-  let animId = requestAnimationFrame(loop);
+
+  function stopGravityFrame() {
+    if (gravityFrameId != null) {
+      cancelAnimationFrame(gravityFrameId);
+      gravityFrameId = null;
+    }
+  }
 
   function handleTiltMove(e) {
     if (isDragging || reducedMotion) return;
@@ -101,8 +218,8 @@ export function createTiltSlider(options = {}) {
     const mouseX = e.clientX - rect.left;
     const centerX = rect.width / 2;
     const percent = (mouseX - centerX) / centerX;
-    angle = percent * maxTilt;
-    needsRender = true;
+    angle = percent * config.maxTilt;
+    scheduleGravityFrame();
 
     if (!activeSlideSound) {
       activeSlideSound = AudioSynth.startSlide();
@@ -112,7 +229,8 @@ export function createTiltSlider(options = {}) {
   function resetTilt() {
     if (isDragging) return;
     angle = 0;
-    needsRender = true;
+    stopGravityFrame();
+    paint();
     if (activeSlideSound) {
       activeSlideSound.stop();
       activeSlideSound = null;
@@ -122,12 +240,14 @@ export function createTiltSlider(options = {}) {
   track.addEventListener('pointermove', handleTiltMove);
   track.addEventListener('pointerleave', resetTilt);
 
-  addPointerDrag(knob, {
+  const teardownDrag = addPointerDrag(knob, {
     onDown(e) {
       isDragging = true;
       e.stopPropagation();
       angle = 0;
-      needsRender = true;
+      stopGravityFrame();
+      startDragSpring();
+      paint();
       if (!activeSlideSound) {
         activeSlideSound = AudioSynth.startSlide();
       }
@@ -136,12 +256,16 @@ export function createTiltSlider(options = {}) {
       const rect = track.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const pct = Math.max(0, Math.min(100, (mouseX / rect.width) * 100));
-      targetValue = pct;
-      needsRender = true;
-      if (onChange) onChange(Math.round(targetValue));
+      if (dragSpring) dragSpring.target(pct);
     },
     onUp() {
       isDragging = false;
+      // Let the spring finish settling into place on its own idle-when-rest
+      // loop; only tear it down once it actually gets there.
+      if (dragSpring) {
+        const spring = dragSpring;
+        spring.onRest(() => { if (dragSpring === spring) stopDragSpring(); });
+      }
       if (activeSlideSound) {
         activeSlideSound.stop();
         activeSlideSound = null;
@@ -155,27 +279,23 @@ export function createTiltSlider(options = {}) {
 
     if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
       value = Math.max(0, value - step);
-      targetValue = value;
       stepped = true;
     } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
       value = Math.min(100, value + step);
-      targetValue = value;
       stepped = true;
     } else if (e.key === 'Home') {
       value = 0;
-      targetValue = value;
       stepped = true;
     } else if (e.key === 'End') {
       value = 100;
-      targetValue = value;
       stepped = true;
     }
 
     if (stepped) {
       e.preventDefault();
-      needsRender = true;
+      if (dragSpring) dragSpring.set(value);
       AudioSynth.playTick();
-      if (onChange) onChange(Math.round(value));
+      scheduleOneShotPaint();
     }
   });
 
@@ -183,38 +303,34 @@ export function createTiltSlider(options = {}) {
     reducedMotion = prefersReducedMotion();
     if (reducedMotion) {
       angle = 0;
+      stopGravityFrame();
       track.style.transform = 'none';
     }
+    scheduleOneShotPaint();
   });
 
-  wrapper.destroy = () => {
-    cancelAnimationFrame(animId);
+  function destroy() {
+    if (oneShotFrameId != null) cancelAnimationFrame(oneShotFrameId);
+    stopGravityFrame();
+    stopDragSpring();
     if (activeSlideSound) activeSlideSound.stop();
     track.removeEventListener('pointermove', handleTiltMove);
     track.removeEventListener('pointerleave', resetTilt);
+    teardownDrag();
     motionListener();
-  };
+  }
 
-  wrapper.getControls = () => {
-    return [
-      { label: 'Gravity Power', type: 'range', min: 0.1, max: 1.5, step: 0.1, value: gravity, onChange: (v) => { gravity = parseFloat(v); } },
-      { label: 'Max Seesaw Tilt', type: 'range', min: 5, max: 30, step: 1, value: maxTilt, onChange: (v) => { maxTilt = parseInt(v); } },
-      { label: 'Spring Lag', type: 'range', min: 0.05, max: 1.0, step: 0.05, value: springLag, onChange: (v) => { springLag = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return Math.round(value);
+  }
 
-  wrapper.getCodeSnippet = () => {
-    return `import { createTiltSlider } from 'winky-wonky';
+  function setValue(v) {
+    value = Math.max(0, Math.min(100, v));
+    angle = 0;
+    if (dragSpring) dragSpring.set(value);
+    lastEmittedValue = Math.round(value);
+    paint();
+  }
 
-const slider = createTiltSlider({
-  initialValue: 50,
-  gravity: 0.4,
-  maxTilt: 15,
-  springLag: 0.2,
-  onChange: (value) => console.log('Volume is: ', value)
-});
-document.body.appendChild(slider);`;
-  };
-
-  return wrapper;
+  return { el: wrapper, getValue, setValue, destroy, config };
 }

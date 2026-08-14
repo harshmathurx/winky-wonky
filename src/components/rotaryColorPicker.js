@@ -1,23 +1,59 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} RotaryPalette
+ * @property {string} name - Display name, also used as each dial hole's aria-label.
+ * @property {'dark'|string} theme - Applied to `<html data-theme>`; `'dark'`
+ *   removes the attribute (dark is the default theme).
+ * @property {Object<string, string>} colors - CSS custom property name →
+ *   value pairs applied to `document.documentElement.style`.
+ */
+
+/**
+ * @typedef {Object} RotaryColorPickerOptions
+ * @property {string} [ariaLabel='Color palette selector'] - Accessible name
+ *   for the dial's radiogroup.
+ * @property {RotaryPalette[]} [palettes] - Palettes to dial through; defaults
+ *   to 5 built-in theme palettes.
+ * @property {(palette: RotaryPalette) => void} [onDialComplete] - Called once
+ *   the dial animation finishes and the palette has been applied.
+ */
+
+/**
+ * @typedef {Object} RotaryColorPickerInstance
+ * @property {HTMLElement} el - Root element (dial + holes); append this to the DOM.
+ * @property {() => number} getValue - Index of the currently selected
+ *   palette in the `palettes` array, or -1 if none selected yet.
+ * @property {(index: number) => void} setValue - Dials to and applies the
+ *   palette at `index`. Note: unlike other components' `setValue`, this
+ *   drives the same visual dial animation and DOES invoke `onDialComplete`
+ *   (the palette application is the whole point of the call).
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ */
+
+/**
+ * Creates a rotary-dial color/theme palette picker; dialing a hole applies
+ * its palette's CSS custom properties to `document.documentElement`.
+ * @param {RotaryColorPickerOptions} [options]
+ * @returns {RotaryColorPickerInstance}
+ */
 export function createRotaryColorPicker(options = {}) {
   const container = document.createElement('div');
-  container.className = 'rotary-selector-container';
+  container.className = 'winky-rotary-selector-container';
 
   const outer = document.createElement('div');
-  outer.className = 'rotary-dial-outer';
+  outer.className = 'winky-rotary-dial-outer';
   outer.setAttribute('role', 'radiogroup');
-  outer.setAttribute('aria-label', 'Color palette selector');
+  outer.setAttribute('aria-label', options.ariaLabel ?? 'Color palette selector');
 
   const center = document.createElement('div');
-  center.className = 'rotary-center';
+  center.className = 'winky-rotary-center';
   center.textContent = 'Rotary Palette';
   outer.appendChild(center);
 
   const wheel = document.createElement('div');
-  wheel.className = 'rotary-wheel';
-  wheel.setAttribute('aria-hidden', 'true');
+  wheel.className = 'winky-rotary-wheel';
   outer.appendChild(wheel);
   container.appendChild(outer);
 
@@ -101,11 +137,11 @@ export function createRotaryColorPicker(options = {}) {
     const rad = angle * Math.PI / 180;
 
     const distance = 54;
-    const x = 80 + Math.cos(rad) * distance;
-    const y = 80 + Math.sin(rad) * distance;
+    const x = 70 + Math.cos(rad) * distance;
+    const y = 70 + Math.sin(rad) * distance;
 
     const hole = document.createElement('div');
-    hole.className = 'rotary-hole winky-focus-visible';
+    hole.className = 'winky-rotary-hole winky-focus-visible';
     hole.style.left = `${x}px`;
     hole.style.top = `${y}px`;
     hole.textContent = `${index + 1}`;
@@ -113,7 +149,7 @@ export function createRotaryColorPicker(options = {}) {
     hole.setAttribute('aria-checked', 'false');
     hole.setAttribute('aria-label', p.name);
     hole.tabIndex = 0;
-    hole.dataset.index = index;
+    hole.dataset.index = String(index);
 
     wheel.appendChild(hole);
     holes.push(hole);
@@ -141,6 +177,38 @@ export function createRotaryColorPicker(options = {}) {
 
   let isDialing = false;
   let currentIndex = -1;
+
+  function applyPalette(palette) {
+    const root = document.documentElement;
+    if (palette.theme === 'dark') {
+      root.removeAttribute('data-theme');
+    } else {
+      root.setAttribute('data-theme', palette.theme);
+    }
+
+    Object.entries(palette.colors).forEach(([variable, value]) => {
+      root.style.setProperty(variable, value);
+    });
+
+    const accentHex = palette.colors['--winky-accent-color'];
+    if (accentHex) {
+      const rgb = hexToRgb(accentHex);
+      if (rgb) {
+        root.style.setProperty('--winky-accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+      }
+    }
+
+    const event = new CustomEvent('theme-changed', { detail: palette.theme });
+    window.dispatchEvent(event);
+  }
+
+  function selectPalette(index) {
+    if (index < 0 || index >= palettes.length) return;
+    holes.forEach((h, i) => h.setAttribute('aria-checked', i === index ? 'true' : 'false'));
+    currentIndex = index;
+    applyPalette(palettes[index]);
+    center.textContent = palettes[index].name;
+  }
 
   function dialPalette(index) {
     if (isDialing) return;
@@ -185,30 +253,6 @@ export function createRotaryColorPicker(options = {}) {
     }, 450);
   }
 
-  function applyPalette(palette) {
-    const root = document.documentElement;
-    if (palette.theme === 'dark') {
-      root.removeAttribute('data-theme');
-    } else {
-      root.setAttribute('data-theme', palette.theme);
-    }
-
-    Object.entries(palette.colors).forEach(([variable, value]) => {
-      root.style.setProperty(variable, value);
-    });
-
-    const accentHex = palette.colors['--winky-accent-color'];
-    if (accentHex) {
-      const rgb = hexToRgb(accentHex);
-      if (rgb) {
-        root.style.setProperty('--winky-accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-      }
-    }
-
-    const event = new CustomEvent('theme-changed', { detail: palette.theme });
-    window.dispatchEvent(event);
-  }
-
   function hexToRgb(hex) {
     const match = hex.match(/^#?([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})$/i);
     if (!match) return null;
@@ -219,35 +263,17 @@ export function createRotaryColorPicker(options = {}) {
     reducedMotion = prefersReducedMotion();
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Selected Dial', type: 'button', value: 'Reset to Indigo', onChange: () => { dialPalette(0); } }
-    ];
-  };
+  function getValue() {
+    return currentIndex;
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createRotaryColorPicker } from 'winky-wonky';
+  function setValue(index) {
+    selectPalette(index);
+  }
 
-const dial = createRotaryColorPicker({
-  palettes: [
-    {
-      name: 'Brand Theme',
-      theme: 'anderson',
-      colors: {
-        '--winky-bg-primary': '#FFFFFF',
-        '--winky-bg-secondary': '#F0F0F0',
-        '--winky-accent-color': '#007FFF'
-      }
-    }
-  ],
-  onDialComplete: (palette) => console.log('Dialed to: ', palette.name)
-});
-document.body.appendChild(dial);`;
-  };
-
-  return container;
+  return { el: container, getValue, setValue, destroy };
 }

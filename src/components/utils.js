@@ -1,26 +1,26 @@
-const reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-const reducedSoundMQ = window.matchMedia('(prefers-reduced-sound: reduce)');
-const coarsePointerMQ = window.matchMedia('(pointer: coarse)');
+// The physics-agnostic pieces that used to live here — the gesture layer
+// (`addPointerDrag`) and the a11y/media helpers (`prefersReducedMotion` and
+// friends) — moved to `@winky/core` in Phase 5 (see docs/AUDIT.md Part 2).
+// Re-exported from here so every one of the 19 not-yet-migrated components'
+// `import { ... } from './utils.js'` keeps working unchanged — `@winky/core`
+// is the single source of truth, this is just a stable local alias.
+export {
+  addPointerDrag,
+  prefersReducedMotion,
+  prefersReducedSound,
+  isCoarsePointer,
+  shouldPlaySound,
+  shouldAnimate,
+  onReducedMotionChange,
+  onReducedSoundChange,
+  onPointerTypeChange,
+} from '@winky/core';
 
-export const prefersReducedMotion = () => reducedMotionMQ.matches;
-export const prefersReducedSound = () => reducedSoundMQ.matches;
-export const isCoarsePointer = () => coarsePointerMQ.matches;
-
-export const onReducedMotionChange = (cb) => {
-  reducedMotionMQ.addEventListener('change', cb);
-  return () => reducedMotionMQ.removeEventListener('change', cb);
-};
-export const onReducedSoundChange = (cb) => {
-  reducedSoundMQ.addEventListener('change', cb);
-  return () => reducedSoundMQ.removeEventListener('change', cb);
-};
-export const onPointerTypeChange = (cb) => {
-  coarsePointerMQ.addEventListener('change', cb);
-  return () => coarsePointerMQ.removeEventListener('change', cb);
-};
-
-export const shouldPlaySound = () => !prefersReducedSound();
-export const shouldAnimate = () => !prefersReducedMotion();
+/**
+ * DOM/ARIA helpers that are specific to wiring up winky-wonky's own
+ * components (not part of the headless engine) — these stay here rather
+ * than moving to `@winky/core`.
+ */
 
 export function setAria(el, attrs) {
   for (const [key, value] of Object.entries(attrs)) {
@@ -81,44 +81,5 @@ export function trapFocus(container) {
     release() {
       container.removeEventListener('keydown', onKeyDown);
     }
-  };
-}
-
-export function addPointerDrag(target, {
-  onDown,
-  onMove,
-  onUp,
-  captureElement = window,
-} = {}) {
-  let isDragging = false;
-
-  function handleDown(e) {
-    isDragging = true;
-    if (onDown) onDown(e);
-    captureElement.addEventListener('pointermove', handleMove);
-    captureElement.addEventListener('pointerup', handleUp);
-    captureElement.addEventListener('pointercancel', handleUp);
-  }
-
-  function handleMove(e) {
-    if (!isDragging) return;
-    if (onMove) onMove(e);
-  }
-
-  function handleUp(e) {
-    isDragging = false;
-    if (onUp) onUp(e);
-    captureElement.removeEventListener('pointermove', handleMove);
-    captureElement.removeEventListener('pointerup', handleUp);
-    captureElement.removeEventListener('pointercancel', handleUp);
-  }
-
-  target.addEventListener('pointerdown', handleDown);
-
-  return () => {
-    target.removeEventListener('pointerdown', handleDown);
-    captureElement.removeEventListener('pointermove', handleMove);
-    captureElement.removeEventListener('pointerup', handleUp);
-    captureElement.removeEventListener('pointercancel', handleUp);
   };
 }

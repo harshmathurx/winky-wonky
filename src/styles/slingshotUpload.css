@@ -1,0 +1,64 @@
+/* 15. Slingshot Upload */
+.winky-slingshot-container {
+  width: 260px;
+  height: 140px;
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius);
+  background: var(--winky-bg-surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--winky-transition);
+}
+
+.winky-slingshot-container:hover {
+  border-color: var(--winky-accent-color);
+}
+
+.winky-slingshot-container.winky-dragover {
+  border-color: var(--winky-accent-color);
+  background: var(--winky-accent-glow);
+}
+
+.winky-slingshot-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.winky-slingshot-band {
+  fill: none;
+  stroke: var(--winky-accent-color);
+  stroke-width: 3px;
+  stroke-linecap: round;
+}
+
+.winky-slingshot-pouch {
+  fill: var(--winky-accent-color);
+  stroke: var(--winky-accent-color);
+  stroke-width: 1px;
+}
+
+.winky-upload-icon-flyer {
+  position: absolute;
+  font-size: 1.6rem;
+  z-index: 10;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.winky-upload-icon-flyer.winky-flying {
+  animation: winky-catapult-launch 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes winky-catapult-launch {
+  0% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -160px) scale(0) rotate(180deg); opacity: 0; }
+}

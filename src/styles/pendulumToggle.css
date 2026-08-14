@@ -1,0 +1,85 @@
+/* 6. Pendulum Toggle */
+.winky-pendulum-toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.winky-pendulum-pivot-box {
+  width: 48px;
+  height: 96px;
+  position: relative;
+}
+
+.winky-pendulum-bracket {
+  width: 16px;
+  height: 4px;
+  background: var(--winky-border-strong);
+  border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.winky-toggle-arm {
+  position: absolute;
+  top: 2px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 64px;
+  background: var(--winky-border-strong);
+  transform-origin: top center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: transform 0.08s ease-out;
+}
+
+.winky-toggle-bob {
+  position: absolute;
+  bottom: -12px;
+  left: -9px;
+  width: 22px;
+  height: 22px;
+  background: var(--winky-accent-color);
+  border: 2px solid var(--winky-bg-primary);
+  border-radius: 50%;
+  box-shadow: var(--winky-box-shadow-glow);
+}
+
+.winky-pendulum-toggle-labels {
+  display: flex;
+  width: 120px;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.winky-toggle-lbl {
+  transition: color 0.2s;
+  color: var(--winky-text-secondary);
+}
+
+.winky-toggle-lbl.winky-active {
+  color: var(--winky-accent-color-text);
+}
+
+.winky-toggle-arm.winky-swing-left { transform: rotate(-22deg); }
+.winky-toggle-arm.winky-swing-right { transform: rotate(22deg); }
+
+.winky-toggle-arm.winky-swinging {
+  animation: winky-pendulum-toggle-physics 0.9s var(--winky-gentle-spring) forwards;
+}
+
+@keyframes winky-pendulum-toggle-physics {
+  0% { transform: rotate(var(--swing-start)); }
+  20% { transform: rotate(var(--swing-overshoot1)); }
+  40% { transform: rotate(var(--swing-overshoot2)); }
+  60% { transform: rotate(var(--swing-overshoot3)); }
+  80% { transform: rotate(var(--swing-overshoot4)); }
+  100% { transform: rotate(var(--swing-target)); }
+}

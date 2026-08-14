@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { copyFileSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -13,23 +13,29 @@ export default defineConfig({
       },
       formats: ['es', 'iife'],
     },
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'style.css') return 'winky-wonky.css';
-          return assetInfo.name;
-        },
-      },
-    },
   },
   plugins: [
     {
+      // src/winky-wonky.css is a plain CSS aggregate (`@import`s tokens,
+      // utilities, and one file per component from src/styles/). It isn't
+      // referenced from any JS entry, so Rollup never sees it — copy it
+      // (and the files it imports) into dist/ by hand, preserving the
+      // same relative layout so the `@import './styles/...'` paths keep
+      // resolving once published.
       name: 'copy-css',
       closeBundle() {
+        const distStylesDir = resolve(__dirname, 'dist/styles');
+        mkdirSync(distStylesDir, { recursive: true });
         copyFileSync(
-          resolve(__dirname, 'src/style.css'),
+          resolve(__dirname, 'src/winky-wonky.css'),
           resolve(__dirname, 'dist/winky-wonky.css')
         );
+        for (const file of readdirSync(resolve(__dirname, 'src/styles'))) {
+          copyFileSync(
+            resolve(__dirname, 'src/styles', file),
+            resolve(distStylesDir, file)
+          );
+        }
       },
     },
   ],

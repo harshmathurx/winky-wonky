@@ -1,0 +1,67 @@
+/* 5. Typewriter Input */
+.winky-typewriter-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.winky-quill-input-container {
+  position: relative;
+  width: 260px;
+}
+
+.winky-quill-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-family: var(--winky-font-sans);
+  font-size: 0.875rem;
+  background: var(--winky-bg-surface);
+  color: var(--winky-text-primary);
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius-sm);
+  outline: none;
+  transition: var(--winky-transition);
+}
+
+.winky-quill-input:focus {
+  border-color: var(--winky-accent-color);
+  box-shadow: var(--winky-box-shadow-glow);
+}
+
+.winky-quill-input.winky-jittering {
+  animation: winky-typing-jitter 0.08s linear infinite alternate;
+}
+
+.winky-projection-board {
+  height: 32px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.1rem;
+  overflow: hidden;
+}
+
+.winky-projected-char {
+  display: inline-block;
+  font-family: var(--winky-font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  opacity: 0;
+  transform-origin: bottom center;
+  animation: winky-char-fly-in 0.22s var(--winky-gentle-spring) forwards;
+  color: var(--winky-text-secondary);
+}
+
+@keyframes winky-typing-jitter {
+  0% { transform: translate(-0.5px, 0.5px); }
+  100% { transform: translate(0.5px, -0.5px); }
+}
+
+@keyframes winky-char-fly-in {
+  0% { transform: translateY(12px) scale(0.6); opacity: 0; }
+  60% { transform: translateY(-2px) scale(1.05); }
+  100% { transform: translateY(0) scale(1) rotate(var(--rand-rot, 0deg)); opacity: 0.8; }
+}

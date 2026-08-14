@@ -1,0 +1,59 @@
+/* 7. Balloon Tooltip */
+.winky-tooltip-target-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.winky-balloon-tooltip {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  transform: translate(-50%, 8px) scale(0.9);
+  transform-origin: bottom center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  transition: transform 0.18s var(--winky-gentle-spring), opacity 0.18s;
+}
+
+.winky-balloon-body {
+  background: var(--winky-bg-glass);
+  backdrop-filter: blur(12px);
+  color: var(--winky-text-primary);
+  border: var(--winky-border-style-strong);
+  border-radius: 10px 10px 10px 4px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--winky-box-shadow);
+}
+
+.winky-balloon-body::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--winky-border-strong);
+}
+
+.winky-balloon-string-svg {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.winky-balloon-string-path {
+  fill: none;
+  stroke: var(--winky-border-strong);
+  stroke-width: 1px;
+}

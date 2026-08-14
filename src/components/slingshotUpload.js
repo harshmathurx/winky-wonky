@@ -1,24 +1,51 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SlingshotUploadOptions
+ * @property {string} [ariaLabel='Upload file by dragging or clicking'] -
+ *   Accessible name for the drop zone.
+ * @property {number} [bandWidth=4] - Slingshot band stroke width in px.
+ * @property {number} [launchSpeed=0.65] - Launch animation duration in seconds.
+ */
+
+/**
+ * @typedef {Object} SlingshotUploadInstance
+ * @property {HTMLElement} el - Root drop-zone element (also a hidden
+ *   `<input type="file">` for the click-to-upload fallback); append this to the DOM.
+ * @property {() => void} destroy - Removes the reduced-motion listener.
+ * @property {{bandWidth: number, launchSpeed: number}} config - Live-mutable
+ *   secondary knobs; prefer `setOptions` for changes that need re-rendering.
+ * @property {(partial: {bandWidth?: number, launchSpeed?: number}) => void} setOptions -
+ *   Updates the band width and/or launch speed.
+ */
+
+/**
+ * Creates a drag-and-drop (or click-to-upload) file target styled as a
+ * slingshot: dragging over it stretches the band, dropping/selecting a
+ * file launches an icon.
+ * @param {SlingshotUploadOptions} [options]
+ * @returns {SlingshotUploadInstance}
+ */
 export function createSlingshotUpload(options = {}) {
   const container = document.createElement('div');
-  container.className = 'slingshot-container';
+  container.className = 'winky-slingshot-container';
   container.setAttribute('role', 'button');
-  container.setAttribute('aria-label', 'Upload file by dragging or clicking');
+  const ariaLabel = options.ariaLabel ?? 'Upload file by dragging or clicking';
+  container.setAttribute('aria-label', ariaLabel);
   container.tabIndex = 0;
   container.classList.add('winky-focus-visible');
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'slingshot-svg');
+  svg.setAttribute('class', 'winky-slingshot-svg');
   svg.setAttribute('aria-hidden', 'true');
 
   const band = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  band.setAttribute('class', 'slingshot-band');
+  band.setAttribute('class', 'winky-slingshot-band');
   svg.appendChild(band);
 
   const pouch = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  pouch.setAttribute('class', 'slingshot-pouch');
+  pouch.setAttribute('class', 'winky-slingshot-pouch');
   svg.appendChild(pouch);
 
   container.appendChild(svg);
@@ -45,8 +72,10 @@ export function createSlingshotUpload(options = {}) {
   fileInput.tabIndex = -1;
   container.appendChild(fileInput);
 
-  let bandWidth = options.bandWidth ?? 4;
-  let launchSpeed = options.launchSpeed ?? 0.65;
+  const config = {
+    bandWidth: options.bandWidth ?? 4,
+    launchSpeed: options.launchSpeed ?? 0.65,
+  };
   let reducedMotion = prefersReducedMotion();
 
   const leftAnchor = { x: 25, y: 80 };
@@ -54,7 +83,7 @@ export function createSlingshotUpload(options = {}) {
 
   function drawBand(x, y) {
     band.setAttribute('d', `M ${leftAnchor.x} ${leftAnchor.y} Q ${x} ${y} ${rightAnchor.x} ${rightAnchor.y}`);
-    band.setAttribute('stroke-width', `${bandWidth}px`);
+    band.setAttribute('stroke-width', `${config.bandWidth}px`);
     pouch.setAttribute('d', `M ${x-12} ${y} L ${x} ${y-8} L ${x+12} ${y} L ${x} ${y+8} Z`);
   }
 
@@ -94,12 +123,12 @@ export function createSlingshotUpload(options = {}) {
       setTimeout(() => { drawBand(140, 80); }, 100);
 
       const flyer = document.createElement('div');
-      flyer.className = 'upload-icon-flyer';
+      flyer.className = 'winky-upload-icon-flyer';
       flyer.textContent = '\u{1F4C4}';
       flyer.style.left = `${x}px`;
       flyer.style.top = `${y}px`;
       flyer.style.setProperty('--start-y', `${y}px`);
-      flyer.style.animation = `catapult-launch ${launchSpeed}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+      flyer.style.animation = `winky-catapult-launch ${config.launchSpeed}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
 
       container.appendChild(flyer);
 
@@ -109,18 +138,18 @@ export function createSlingshotUpload(options = {}) {
 
   container.addEventListener('dragover', (e) => {
     e.preventDefault();
-    container.classList.add('dragover');
+    container.classList.add('winky-dragover');
     stretchBand(e.clientX, e.clientY);
   });
 
   container.addEventListener('dragleave', () => {
-    container.classList.remove('dragover');
+    container.classList.remove('winky-dragover');
     resetBand();
   });
 
   container.addEventListener('drop', (e) => {
     e.preventDefault();
-    container.classList.remove('dragover');
+    container.classList.remove('winky-dragover');
     const { x, y } = stretchBand(e.clientX, e.clientY);
 
     setTimeout(() => { launchFile(x, y); }, 50);
@@ -150,26 +179,19 @@ export function createSlingshotUpload(options = {}) {
 
   drawBand(140, 80);
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Elastic Width', type: 'range', min: 2, max: 6, step: 1, value: bandWidth, onChange: (v) => { bandWidth = parseInt(v); drawBand(140, 80); } },
-      { label: 'Launch Speed', type: 'range', min: 0.3, max: 1.5, step: 0.1, value: launchSpeed, onChange: (v) => { launchSpeed = parseFloat(v); } }
-    ];
-  };
+  function setOptions(partial = {}) {
+    if (partial.bandWidth != null) {
+      config.bandWidth = partial.bandWidth;
+      drawBand(140, 80);
+    }
+    if (partial.launchSpeed != null) {
+      config.launchSpeed = partial.launchSpeed;
+    }
+  }
 
-  container.getCodeSnippet = () => {
-    return `import { createSlingshotUpload } from 'winky-wonky';
-
-const uploader = createSlingshotUpload({
-  bandWidth: 4,
-  launchSpeed: 0.6
-});
-document.body.appendChild(uploader);`;
-  };
-
-  return container;
+  return { el: container, destroy, config, setOptions };
 }

@@ -1,24 +1,50 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, makeFocusable, onKeyActivation, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} PendulumToggleOptions
+ * @property {boolean} [initialState=false] - Starting on/off state.
+ * @property {number} [damping=0.5] - Overshoot damping for the swing physics.
+ * @property {number} [swingTime=1.4] - Swing animation duration in seconds.
+ * @property {string} [ariaLabel='Pendulum toggle switch'] - Accessible name.
+ * @property {(state: boolean) => void} [onChange] - Called with the new
+ *   on/off state whenever it changes from user interaction.
+ */
+
+/**
+ * @typedef {Object} PendulumToggleInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => boolean} getValue - Current on/off state.
+ * @property {(value: boolean) => void} setValue - Programmatically set the
+ *   state (snaps instantly, no swing). Updates DOM/ARIA; does NOT invoke `onChange`.
+ * @property {() => void} destroy
+ * @property {{damping: number, swingTime: number}} config - Live-mutable
+ *   passive physics knobs.
+ */
+
+/**
+ * Creates a pendulum-style toggle switch that swings and settles under damping.
+ * @param {PendulumToggleOptions} [options]
+ * @returns {PendulumToggleInstance}
+ */
 export function createPendulumToggle(options = {}) {
   const wrapper = document.createElement('div');
-  wrapper.className = 'pendulum-toggle-container';
+  wrapper.className = 'winky-pendulum-toggle-container';
 
   const pivotBox = document.createElement('div');
-  pivotBox.className = 'pendulum-pivot-box';
+  pivotBox.className = 'winky-pendulum-pivot-box';
 
   const bracket = document.createElement('div');
-  bracket.className = 'pendulum-bracket';
+  bracket.className = 'winky-pendulum-bracket';
   pivotBox.appendChild(bracket);
 
   const arm = document.createElement('div');
-  arm.className = 'toggle-arm winky-focus-visible';
+  arm.className = 'winky-toggle-arm winky-focus-visible';
   arm.setAttribute('role', 'switch');
   makeFocusable(arm);
 
   const bob = document.createElement('div');
-  bob.className = 'toggle-bob';
+  bob.className = 'winky-toggle-bob';
   bob.setAttribute('aria-hidden', 'true');
   arm.appendChild(bob);
 
@@ -26,16 +52,16 @@ export function createPendulumToggle(options = {}) {
   wrapper.appendChild(pivotBox);
 
   const labels = document.createElement('div');
-  labels.className = 'pendulum-toggle-labels';
+  labels.className = 'winky-pendulum-toggle-labels';
 
   const labelOff = document.createElement('span');
-  labelOff.className = 'toggle-lbl';
+  labelOff.className = 'winky-toggle-lbl';
   labelOff.textContent = 'OFF';
   labelOff.setAttribute('aria-hidden', 'true');
   labels.appendChild(labelOff);
 
   const labelOn = document.createElement('span');
-  labelOn.className = 'toggle-lbl';
+  labelOn.className = 'winky-toggle-lbl';
   labelOn.textContent = 'ON';
   labelOn.setAttribute('aria-hidden', 'true');
   labels.appendChild(labelOn);
@@ -43,36 +69,39 @@ export function createPendulumToggle(options = {}) {
   wrapper.appendChild(labels);
 
   let isOn = options.initialState ?? false;
-  let damping = options.damping ?? 0.5;
-  let swingTime = options.swingTime ?? 1.4;
+  const config = {
+    damping: options.damping ?? 0.5,
+    swingTime: options.swingTime ?? 1.4,
+  };
   const onChange = options.onChange;
+  const ariaLabel = options.ariaLabel ?? 'Pendulum toggle switch';
   let reducedMotion = prefersReducedMotion();
 
-  arm.className = `toggle-arm winky-focus-visible ${isOn ? 'swing-right' : 'swing-left'}`;
+  arm.className = `winky-toggle-arm winky-focus-visible ${isOn ? 'winky-swing-right' : 'winky-swing-left'}`;
   setAria(arm, {
     'checked': String(isOn),
-    'label': 'Pendulum toggle switch',
+    'label': ariaLabel,
   });
 
-  if (isOn) labelOn.classList.add('active');
-  else labelOff.classList.add('active');
+  if (isOn) labelOn.classList.add('winky-active');
+  else labelOff.classList.add('winky-active');
 
   function triggerSwing() {
     isOn = !isOn;
     AudioSynth.playTick();
 
     if (reducedMotion) {
-      arm.classList.remove('swing-left', 'swing-right', 'swinging');
-      arm.classList.add(isOn ? 'swing-right' : 'swing-left');
+      arm.classList.remove('winky-swing-left', 'winky-swing-right', 'winky-swinging');
+      arm.classList.add(isOn ? 'winky-swing-right' : 'winky-swing-left');
     } else {
       const start = isOn ? -35 : 35;
       const target = isOn ? 35 : -35;
       const diff = target - start;
 
-      const os1 = target + diff * damping * -0.5;
-      const os2 = target + diff * damping * damping * 0.25;
-      const os3 = target + diff * damping * damping * damping * -0.12;
-      const os4 = target + diff * damping * damping * damping * damping * 0.06;
+      const os1 = target + diff * config.damping * -0.5;
+      const os2 = target + diff * config.damping * config.damping * 0.25;
+      const os3 = target + diff * config.damping * config.damping * config.damping * -0.12;
+      const os4 = target + diff * config.damping * config.damping * config.damping * config.damping * 0.06;
 
       arm.style.setProperty('--swing-start', `${start}deg`);
       arm.style.setProperty('--swing-overshoot1', `${os1}deg`);
@@ -81,18 +110,18 @@ export function createPendulumToggle(options = {}) {
       arm.style.setProperty('--swing-overshoot4', `${os4}deg`);
       arm.style.setProperty('--swing-target', `${target}deg`);
 
-      arm.classList.remove('swing-left', 'swing-right', 'swinging');
+      arm.classList.remove('winky-swing-left', 'winky-swing-right', 'winky-swinging');
       void arm.offsetWidth;
-      arm.style.animationDuration = `${swingTime}s`;
-      arm.classList.add('swinging');
+      arm.style.animationDuration = `${config.swingTime}s`;
+      arm.classList.add('winky-swinging');
     }
 
     if (isOn) {
-      labelOn.classList.add('active');
-      labelOff.classList.remove('active');
+      labelOn.classList.add('winky-active');
+      labelOff.classList.remove('winky-active');
     } else {
-      labelOff.classList.add('active');
-      labelOn.classList.remove('active');
+      labelOff.classList.add('winky-active');
+      labelOn.classList.remove('winky-active');
     }
 
     arm.setAttribute('aria-checked', String(isOn));
@@ -100,8 +129,8 @@ export function createPendulumToggle(options = {}) {
   }
 
   arm.addEventListener('animationend', () => {
-    arm.classList.remove('swinging');
-    arm.classList.add(isOn ? 'swing-right' : 'swing-left');
+    arm.classList.remove('winky-swinging');
+    arm.classList.add(isOn ? 'winky-swing-right' : 'winky-swing-left');
     AudioSynth.playClack();
   });
 
@@ -111,33 +140,37 @@ export function createPendulumToggle(options = {}) {
   const motionListener = onReducedMotionChange(() => {
     reducedMotion = prefersReducedMotion();
     if (reducedMotion) {
-      arm.classList.remove('swinging');
-      arm.classList.add(isOn ? 'swing-right' : 'swing-left');
+      arm.classList.remove('winky-swinging');
+      arm.classList.add(isOn ? 'winky-swing-right' : 'winky-swing-left');
     }
   });
 
-  wrapper.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  wrapper.getControls = () => {
-    return [
-      { label: 'Swing Weight (s)', type: 'range', min: 0.8, max: 2.5, step: 0.1, value: swingTime, onChange: (v) => { swingTime = parseFloat(v); } },
-      { label: 'Physics Damping', type: 'range', min: 0.1, max: 0.8, step: 0.05, value: damping, onChange: (v) => { damping = parseFloat(v); } }
-    ];
-  };
+  function getValue() {
+    return isOn;
+  }
 
-  wrapper.getCodeSnippet = () => {
-    return `import { createPendulumToggle } from 'winky-wonky';
+  function setValue(v) {
+    const next = Boolean(v);
+    if (next === isOn) return;
+    isOn = next;
 
-const toggle = createPendulumToggle({
-  initialState: false,
-  damping: 0.5,
-  swingTime: 1.4,
-  onChange: (state) => console.log('Toggle state shifted to: ', state)
-});
-document.body.appendChild(toggle);`;
-  };
+    arm.classList.remove('winky-swing-left', 'winky-swing-right', 'winky-swinging');
+    arm.classList.add(isOn ? 'winky-swing-right' : 'winky-swing-left');
 
-  return wrapper;
+    if (isOn) {
+      labelOn.classList.add('winky-active');
+      labelOff.classList.remove('winky-active');
+    } else {
+      labelOff.classList.add('winky-active');
+      labelOn.classList.remove('winky-active');
+    }
+
+    arm.setAttribute('aria-checked', String(isOn));
+  }
+
+  return { el: wrapper, getValue, setValue, destroy, config };
 }

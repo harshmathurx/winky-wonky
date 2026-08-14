@@ -1,52 +1,84 @@
 import { AudioSynth } from './audioSynth.js';
 import { prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} SuspiciousEyesOptions
+ * @property {string} [inputAriaLabel='Secret passcode'] - Accessible name
+ *   for the password input.
+ * @property {string} [revealAriaLabel='Reveal passcode'] - Accessible name
+ *   for the show/hide toggle button.
+ * @property {number} [trackingSensitivity=7] - Max px the pupils travel
+ *   toward the tracked point.
+ * @property {number} [shockDuration=1500] - How long (ms) the eyes stay
+ *   "shocked" after the password is revealed.
+ */
+
+/**
+ * @typedef {Object} SuspiciousEyesInstance
+ * @property {HTMLElement} el - Root element (eyes + password input row); append this to the DOM.
+ * @property {() => void} destroy - Removes the window-level pointermove
+ *   listener and the reduced-motion listener.
+ * @property {{trackingSensitivity: number, shockDuration: number}} config -
+ *   Live-mutable knobs, read on every look/reveal.
+ */
+
+/**
+ * Creates a password input with a pair of eyes that track the cursor (or
+ * the caret while focused) and look "shocked" when the password is revealed.
+ * @param {SuspiciousEyesOptions} [options]
+ * @returns {SuspiciousEyesInstance}
+ */
 export function createSuspiciousEyes(options = {}) {
   const container = document.createElement('div');
-  container.className = 'suspicious-input-wrapper';
+  container.className = 'winky-suspicious-input-wrapper';
 
   const eyesBox = document.createElement('div');
-  eyesBox.className = 'eyes-container';
+  eyesBox.className = 'winky-eyes-container';
   eyesBox.setAttribute('role', 'presentation');
   eyesBox.setAttribute('aria-hidden', 'true');
 
   const leftEye = document.createElement('div');
-  leftEye.className = 'wonky-eye';
+  leftEye.className = 'winky-wonky-eye';
   const leftPupil = document.createElement('div');
-  leftPupil.className = 'wonky-pupil';
+  leftPupil.className = 'winky-wonky-pupil';
   leftEye.appendChild(leftPupil);
   eyesBox.appendChild(leftEye);
 
   const rightEye = document.createElement('div');
-  rightEye.className = 'wonky-eye';
+  rightEye.className = 'winky-wonky-eye';
   const rightPupil = document.createElement('div');
-  rightPupil.className = 'wonky-pupil';
+  rightPupil.className = 'winky-wonky-pupil';
   rightEye.appendChild(rightPupil);
   eyesBox.appendChild(rightEye);
 
   container.appendChild(eyesBox);
 
   const inputRow = document.createElement('div');
-  inputRow.className = 'password-input-row';
+  inputRow.className = 'winky-password-input-row';
+
+  const inputAriaLabel = options.inputAriaLabel ?? 'Secret passcode';
+  const revealAriaLabel = options.revealAriaLabel ?? 'Reveal passcode';
 
   const input = document.createElement('input');
   input.type = 'password';
-  input.className = 'quill-input winky-focus-visible';
+  input.className = 'winky-quill-input winky-focus-visible';
   input.placeholder = 'Enter secret passcode...';
-  input.setAttribute('aria-label', 'Secret passcode');
+  input.setAttribute('aria-label', inputAriaLabel);
   inputRow.appendChild(input);
 
   const revealBtn = document.createElement('button');
-  revealBtn.className = 'reveal-btn winky-focus-visible';
+  revealBtn.className = 'winky-reveal-btn winky-focus-visible';
   revealBtn.textContent = '\u{1F441}';
-  revealBtn.setAttribute('aria-label', 'Reveal passcode');
+  revealBtn.setAttribute('aria-label', revealAriaLabel);
   revealBtn.setAttribute('aria-pressed', 'false');
   inputRow.appendChild(revealBtn);
 
   container.appendChild(inputRow);
 
-  let trackingSensitivity = options.trackingSensitivity ?? 7;
-  let shockDuration = options.shockDuration ?? 1500;
+  const config = {
+    trackingSensitivity: options.trackingSensitivity ?? 7,
+    shockDuration: options.shockDuration ?? 1500,
+  };
   let isFocused = false;
   let caretX = 0;
   let caretY = 0;
@@ -66,7 +98,7 @@ export function createSuspiciousEyes(options = {}) {
       const dist = Math.hypot(dx, dy);
       const angle = Math.atan2(dy, dx);
 
-      const travel = Math.min(trackingSensitivity, dist * 0.05);
+      const travel = Math.min(config.trackingSensitivity, dist * 0.05);
       const px = Math.cos(angle) * travel;
       const py = Math.sin(angle) * travel;
 
@@ -116,13 +148,13 @@ export function createSuspiciousEyes(options = {}) {
     revealBtn.setAttribute('aria-pressed', String(isShowing));
 
     if (!reducedMotion) {
-      leftEye.classList.add('shocked');
-      rightEye.classList.add('shocked');
+      leftEye.classList.add('winky-shocked');
+      rightEye.classList.add('winky-shocked');
 
       setTimeout(() => {
-        leftEye.classList.remove('shocked');
-        rightEye.classList.remove('shocked');
-      }, shockDuration);
+        leftEye.classList.remove('winky-shocked');
+        rightEye.classList.remove('winky-shocked');
+      }, config.shockDuration);
     }
   });
 
@@ -134,27 +166,10 @@ export function createSuspiciousEyes(options = {}) {
     }
   });
 
-  container.destroy = () => {
+  function destroy() {
     window.removeEventListener('pointermove', onMouseMove);
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [
-      { label: 'Eye Sensitivity', type: 'range', min: 4, max: 12, step: 1, value: trackingSensitivity, onChange: (v) => { trackingSensitivity = parseInt(v); } },
-      { label: 'Shock Time (ms)', type: 'range', min: 500, max: 3000, step: 250, value: shockDuration, onChange: (v) => { shockDuration = parseInt(v); } }
-    ];
-  };
-
-  container.getCodeSnippet = () => {
-    return `import { createSuspiciousEyes } from 'winky-wonky';
-
-const passwordInput = createSuspiciousEyes({
-  trackingSensitivity: 8,
-  shockDuration: 2000
-});
-document.body.appendChild(passwordInput);`;
-  };
-
-  return container;
+  return { el: container, destroy, config };
 }

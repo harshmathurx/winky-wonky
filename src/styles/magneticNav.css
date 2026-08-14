@@ -1,0 +1,49 @@
+/* 23. Magnetic Nav */
+.winky-magnetic-nav-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: fit-content;
+}
+
+.winky-magnetic-nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--winky-accent-color);
+  transition: transform 0.3s var(--winky-gentle-spring), width 0.3s var(--winky-gentle-spring);
+  box-shadow: 0 0 8px var(--winky-accent-glow);
+}
+
+.winky-magnetic-nav-list {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.winky-magnetic-nav-item {
+  position: relative;
+}
+
+.winky-magnetic-nav-link {
+  padding: 0.5rem 0.9rem;
+  background: transparent;
+  border: none;
+  color: var(--winky-text-secondary);
+  font-family: var(--winky-font-sans);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.1s ease-out;
+  white-space: nowrap;
+}
+
+.winky-magnetic-nav-link:hover {
+  color: var(--winky-text-primary);
+}
+
+.winky-magnetic-nav-link[aria-current="page"] {
+  color: var(--winky-accent-color-text);
+}
+

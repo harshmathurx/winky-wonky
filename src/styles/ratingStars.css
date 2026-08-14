@@ -1,0 +1,35 @@
+/* 10. Rating Stars */
+.winky-rating-stars-container {
+  display: flex;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.winky-wonky-star {
+  font-size: 1.6rem;
+  color: var(--winky-border-strong);
+  cursor: pointer;
+  transition: color 0.12s, transform 0.12s;
+  user-select: none;
+  display: inline-block;
+  transform-origin: center center;
+}
+
+.winky-wonky-star.winky-active {
+  color: var(--winky-accent-color);
+  filter: drop-shadow(0 0 6px var(--winky-accent-glow));
+}
+
+.winky-wonky-star:hover {
+  color: var(--winky-accent-alt) !important;
+  transform: scale(1.08);
+}
+
+.winky-wonky-star.winky-collapsed {
+  animation: winky-star-collapse 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+@keyframes winky-star-collapse {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(90deg); opacity: 0; }
+}

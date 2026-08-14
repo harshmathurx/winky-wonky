@@ -1,6 +1,6 @@
 {
   "name": "winky-wonky",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "description": "A whimsical, physics-based, audio-synthesized design system inspired by Wes Anderson and Tim Burton. Wobbly buttons, seesaw sliders, pendulum toggles, slingshot uploads, and more.",
   "type": "module",
   "license": "MIT",
@@ -29,34 +29,70 @@
   ],
   "main": "./src/index.js",
   "module": "./src/index.js",
+  "types": "./dist/types/index.d.ts",
   "unpkg": "./dist/winky-wonky.min.js",
   "jsdelivr": "./dist/winky-wonky.min.js",
   "exports": {
-    ".": "./src/index.js",
-    "./style.css": "./src/style.css",
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./style.css": "./src/winky-wonky.css",
     "./dist/*": "./dist/*",
     "./components/*": "./src/components/*"
   },
   "files": [
     "src/index.js",
-    "src/style.css",
+    "src/winky-wonky.css",
+    "src/styles",
     "src/components",
     "dist/winky-wonky.min.js",
+    "dist/winky-wonky.es.js",
     "dist/winky-wonky.css",
+    "dist/styles",
+    "dist/types",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "sideEffects": [
     "*.css"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "build:lib": "vite build --config vite.lib.config.js",
-    "prepublishOnly": "npm run build:lib",
-    "preview": "vite preview"
+    "types": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build:lib && npm run types",
+    "test": "vitest run",
+    "test:all": "npm test --workspaces --if-present && npm test",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@winky/core": "^2.0.0-alpha.0"
   },
   "devDependencies": {
-    "vite": "^8.0.12"
+    "@changesets/changelog-github": "^1.0.0",
+    "@changesets/cli": "^3.0.0",
+    "@storybook/addon-a11y": "^10.5.8",
+    "@storybook/addon-docs": "^10.5.8",
+    "@storybook/addon-themes": "^10.5.8",
+    "@storybook/html-vite": "^10.5.8",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.62.1",
+    "storybook": "^10.5.8",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.10"
   }
 }

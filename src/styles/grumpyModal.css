@@ -1,0 +1,100 @@
+/* 9. Grumpy Modal */
+.winky-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(43, 37, 32, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.winky-modal-overlay.winky-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.winky-grumpy-modal-box {
+  background: var(--winky-bg-glass);
+  backdrop-filter: blur(20px);
+  border: var(--winky-border-style-strong);
+  border-radius: var(--winky-border-radius);
+  box-shadow: var(--winky-box-shadow-hover);
+  padding: var(--winky-space-xl);
+  width: 90%;
+  max-width: 380px;
+  position: relative;
+  transform-origin: top center;
+  transform: translateY(-60vh) rotate(-4deg);
+  transition: transform 0.4s var(--winky-spring);
+}
+
+.winky-modal-overlay.winky-open .winky-grumpy-modal-box {
+  transform: translateY(0) rotate(0deg);
+}
+
+.winky-grumpy-modal-box.winky-shaking {
+  animation: winky-grumpy-shake 0.3s ease-in-out;
+}
+
+.winky-modal-header {
+  font-family: var(--winky-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.winky-modal-body {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  color: var(--winky-text-secondary);
+}
+
+.winky-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.winky-modal-btn {
+  padding: 0.5rem 1.1rem;
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius-sm);
+  font-family: var(--winky-font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--winky-transition);
+}
+
+.winky-modal-btn:active {
+  transform: scale(0.97);
+}
+
+.winky-modal-btn-close {
+  background: var(--winky-accent-color);
+  color: var(--winky-accent-color-fill-text);
+  border-color: transparent;
+}
+
+.winky-modal-btn-close:hover {
+  background: var(--winky-accent-alt);
+  color: var(--winky-accent-alt-fill-text);
+}
+
+@keyframes winky-grumpy-shake {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(-2deg) translateX(-4px); }
+  40% { transform: rotate(1.5deg) translateX(3px); }
+  60% { transform: rotate(-1deg) translateX(-2px); }
+  80% { transform: rotate(0.5deg) translateX(1px); }
+  100% { transform: rotate(0); }
+}

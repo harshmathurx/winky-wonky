@@ -1,9 +1,29 @@
 import { AudioSynth } from './audioSynth.js';
 import { setAria, prefersReducedMotion, onReducedMotionChange } from './utils.js';
 
+/**
+ * @typedef {Object} ElasticDragListOptions
+ * @property {{label: string}[]} [items] - Initial list items.
+ * @property {string} [ariaLabel='Reorderable list'] - Accessible name for the list.
+ * @property {(order: string[]) => void} [onChange] - Called with the new
+ *   item-label order after a reorder (drag/drop or Alt+Arrow).
+ */
+
+/**
+ * @typedef {Object} ElasticDragListInstance
+ * @property {HTMLElement} el - Root element; append this to the DOM.
+ * @property {() => void} destroy - Removes listeners.
+ */
+
+/**
+ * Creates a reorderable list with drag-and-drop and Alt+Arrow keyboard
+ * reordering, with elastic visual feedback on drag-over.
+ * @param {ElasticDragListOptions} [options]
+ * @returns {ElasticDragListInstance}
+ */
 export function createElasticDragList(options = {}) {
   const container = document.createElement('div');
-  container.className = 'elastic-list-container';
+  container.className = 'winky-elastic-list-container';
 
   const itemsData = options.items ?? [
     { label: 'Wind-up Bird' },
@@ -15,14 +35,15 @@ export function createElasticDragList(options = {}) {
 
   let reducedMotion = prefersReducedMotion();
   const onChange = options.onChange;
+  const ariaLabel = options.ariaLabel ?? 'Reorderable list';
   let items = [...itemsData];
   let dragIndex = -1;
   let dragOverIndex = -1;
 
   const list = document.createElement('ul');
-  list.className = 'elastic-list';
+  list.className = 'winky-elastic-list';
   list.setAttribute('role', 'listbox');
-  list.setAttribute('aria-label', 'Reorderable list');
+  list.setAttribute('aria-label', ariaLabel);
   container.appendChild(list);
 
   const itemElements = [];
@@ -33,26 +54,26 @@ export function createElasticDragList(options = {}) {
 
     items.forEach((data, index) => {
       const li = document.createElement('li');
-      li.className = 'elastic-list-item winky-focus-visible';
+      li.className = 'winky-elastic-list-item winky-focus-visible';
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', 'false');
       li.tabIndex = 0;
       li.draggable = true;
-      li.dataset.index = index;
+      li.dataset.index = String(index);
 
       const handle = document.createElement('span');
-      handle.className = 'elastic-list-handle';
+      handle.className = 'winky-elastic-list-handle';
       handle.setAttribute('aria-hidden', 'true');
-      handle.textContent = '\u2261';
+      handle.textContent = '≡';
       li.appendChild(handle);
 
       const label = document.createElement('span');
-      label.className = 'elastic-list-label';
+      label.className = 'winky-elastic-list-label';
       label.textContent = data.label;
       li.appendChild(label);
 
       if (index === dragOverIndex && !reducedMotion) {
-        li.classList.add('drag-over');
+        li.classList.add('winky-drag-over');
       }
 
       list.appendChild(li);
@@ -60,14 +81,14 @@ export function createElasticDragList(options = {}) {
 
       li.addEventListener('dragstart', (e) => {
         dragIndex = index;
-        li.classList.add('dragging');
+        li.classList.add('winky-dragging');
         e.dataTransfer.effectAllowed = 'move';
         if (!reducedMotion) AudioSynth.playTick();
       });
 
       li.addEventListener('dragend', () => {
-        li.classList.remove('dragging');
-        itemElements.forEach(el => el.classList.remove('drag-over'));
+        li.classList.remove('winky-dragging');
+        itemElements.forEach(el => el.classList.remove('winky-drag-over'));
         dragIndex = -1;
         dragOverIndex = -1;
       });
@@ -77,7 +98,7 @@ export function createElasticDragList(options = {}) {
         if (index === dragIndex) return;
         dragOverIndex = index;
         itemElements.forEach((el, i) => {
-          el.classList.toggle('drag-over', i === dragOverIndex && !reducedMotion);
+          el.classList.toggle('winky-drag-over', i === dragOverIndex && !reducedMotion);
         });
       });
 
@@ -132,27 +153,9 @@ export function createElasticDragList(options = {}) {
     reducedMotion = prefersReducedMotion();
   });
 
-  container.destroy = () => {
+  function destroy() {
     motionListener();
-  };
+  }
 
-  container.getControls = () => {
-    return [];
-  };
-
-  container.getCodeSnippet = () => {
-    return `import { createElasticDragList } from 'winky-wonky';
-
-const list = createElasticDragList({
-  items: [
-    { label: 'Item 1' },
-    { label: 'Item 2' },
-    { label: 'Item 3' },
-  ],
-  onChange: (order) => console.log('New order:', order)
-});
-document.body.appendChild(list);`;
-  };
-
-  return container;
+  return { el: container, destroy };
 }

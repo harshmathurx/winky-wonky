@@ -1,0 +1,79 @@
+/* 8. Slime Progress */
+.winky-slime-progress-container {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.winky-slime-track {
+  width: 100%;
+  height: 6px;
+  background: var(--winky-bg-surface);
+  border: var(--winky-border-style);
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+}
+
+.winky-slime-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--winky-accent-color), var(--winky-accent-alt));
+  border-radius: 3px;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 0 8px var(--winky-accent-glow);
+}
+
+.winky-slime-drips-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  pointer-events: none;
+}
+
+.winky-slime-drip {
+  position: absolute;
+  width: 8px;
+  background: var(--winky-accent-color);
+  border-radius: 0 0 4px 4px;
+  transform-origin: top center;
+  display: none;
+}
+
+.winky-slime-drip.winky-dripping {
+  display: block;
+  animation: winky-slime-melt-fall 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+}
+
+.winky-slime-btn {
+  padding: 0.35rem 0.75rem;
+  font-family: var(--winky-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: var(--winky-border-style);
+  border-radius: var(--winky-border-radius-sm);
+  background: var(--winky-bg-surface);
+  color: var(--winky-text-primary);
+  cursor: pointer;
+  transition: var(--winky-transition);
+  align-self: flex-start;
+}
+
+.winky-slime-btn:hover {
+  border-color: var(--winky-accent-color);
+  background: var(--winky-accent-glow);
+}
+
+.winky-slime-btn:active {
+  transform: scale(0.97);
+}
+
+@keyframes winky-slime-melt-fall {
+  0% { height: 0px; opacity: 1; }
+  40% { height: 10px; opacity: 1; }
+  100% { height: 24px; opacity: 0; transform: translateY(4px); }
+}

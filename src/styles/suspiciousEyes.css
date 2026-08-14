@@ -1,0 +1,66 @@
+/* 14. Suspicious Eyes */
+.winky-suspicious-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.winky-eyes-container {
+  display: flex;
+  gap: 10px;
+  height: 28px;
+  margin-bottom: 0.2rem;
+}
+
+.winky-wonky-eye {
+  width: 34px;
+  height: 28px;
+  background: var(--winky-bg-surface);
+  border: var(--winky-border-style);
+  border-radius: 50% 50% 45% 45% / 55% 55% 40% 40%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.15s var(--winky-gentle-spring), border-color 0.2s;
+}
+
+.winky-wonky-pupil {
+  width: 10px;
+  height: 10px;
+  background: var(--winky-text-primary);
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.06s ease-out;
+}
+
+.winky-wonky-eye.winky-shocked {
+  transform: scale(1.2);
+  border-color: var(--winky-accent-color);
+}
+
+.winky-password-input-row {
+  position: relative;
+  width: 240px;
+}
+
+.winky-reveal-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--winky-text-secondary);
+  user-select: none;
+  transition: var(--winky-transition);
+}
+
+.winky-reveal-btn:hover {
+  color: var(--winky-accent-color);
+}

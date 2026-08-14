@@ -1,0 +1,59 @@
+/* 17. Wobbly Checkbox */
+.winky-wobbly-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.winky-wobbly-checkbox-box {
+  width: 22px;
+  height: 22px;
+  border: var(--winky-border-style);
+  border-radius: 6px;
+  background: var(--winky-bg-surface);
+  position: relative;
+  transition: transform 0.15s var(--winky-gentle-spring), background 0.15s;
+}
+
+.winky-wobbly-checkbox-box.winky-checked {
+  background: var(--winky-accent-color);
+  border-color: var(--winky-accent-color);
+}
+
+.winky-wobbly-check-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.winky-wobbly-check-tick {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.15s ease-out;
+}
+
+.winky-wobbly-checkbox-box.winky-checked .winky-wobbly-check-tick {
+  stroke-dashoffset: 0;
+}
+
+.winky-wobbly-checkbox-box.winky-jittering {
+  animation: winky-checkbox-jiggle 0.15s ease-out;
+}
+
+@keyframes winky-checkbox-jiggle {
+  0% { transform: scale(0.92); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
