@@ -42,20 +42,15 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: packages/winky-wonky-react/package-lock.json
 
       - name: Install dependencies
-        working-directory: packages/winky-wonky-react
         run: npm ci
 
       - name: Build
-        working-directory: packages/winky-wonky-react
-        run: npm run build
+        run: npm run build --workspace=winky-wonky-react
 
       - name: Verify built output has no JSX syntax
-        working-directory: packages/winky-wonky-react
-        run: node --check dist/index.js
+        run: node --check packages/winky-wonky-react/dist/index.js
 
       - name: Generate type declarations
-        working-directory: packages/winky-wonky-react
-        run: npm run types
+        run: npm run types --workspace=winky-wonky-react
