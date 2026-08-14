@@ -1,4 +1,4 @@
-import { AudioSynth, addPointerDrag, createSpring, prefersReducedMotion, onReducedMotionChange } from '@winky/core';
+import { AudioSynth, addPointerDrag, createSpring, prefersReducedMotion, onReducedMotionChange } from '@winkywonky/core';
 import { setAria, makeFocusable } from './utils.js';
 
 /**
@@ -8,7 +8,7 @@ import { setAria, makeFocusable } from './utils.js';
  *   tilted track once released (0.1-1.5 is a sane range).
  * @property {number} [maxTilt=15] - Maximum seesaw tilt angle in degrees.
  * @property {number} [springLag=0.2] - Drag-follow responsiveness (0-1,
- *   higher = snappier); mapped onto the underlying `@winky/core` spring's
+ *   higher = snappier); mapped onto the underlying `@winkywonky/core` spring's
  *   stiffness at the start of each drag.
  * @property {string} [ariaLabel='Seesaw volume slider'] - Accessible name for the slider.
  * @property {(value: number) => void} [onChange] - Called with the rounded
@@ -32,7 +32,7 @@ import { setAria, makeFocusable } from './utils.js';
  * Creates a "seesaw" slider: hovering tilts the track and gravity slides the
  * knob down-slope; dragging moves it directly.
  *
- * Built on `@winky/core`: pointer tracking is `addPointerDrag`, the
+ * Built on `@winkywonky/core`: pointer tracking is `addPointerDrag`, the
  * drag-follow/release-settle motion is a `createSpring` instance (replacing
  * the old ad-hoc `value += (target - value) * springLag` lerp), and the
  * tick/slide sounds and reduced-motion check come from the same core

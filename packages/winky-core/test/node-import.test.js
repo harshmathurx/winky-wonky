@@ -1,10 +1,10 @@
 // Runs in plain Node (this package's default environment — see
-// vitest.config.js). Proves `@winky/core` — springs, gestures, audio, and
+// vitest.config.js). Proves `@winkywonky/core` — springs, gestures, audio, and
 // a11y/media helpers alike — imports cleanly with no window/document at
 // module-evaluation time, matching the "SSR-safe from day one" requirement.
 import { describe, it, expect } from 'vitest';
 
-describe('@winky/core — imports cleanly in Node', () => {
+describe('@winkywonky/core — imports cleanly in Node', () => {
   it('imports the aggregate entry without throwing', async () => {
     expect(typeof window).toBe('undefined');
     expect(typeof document).toBe('undefined');

@@ -71,7 +71,7 @@ record.
 
 ### Added
 
-- **`@winky/core`** — the physics engine extracted as its own headless package:
+- **`@winkywonky/core`** — the physics engine extracted as its own headless package:
   `createSpring` (one damped-spring implementation with `set`/`target`/
   `onUpdate`/`onRest`, closed-form integration, idle-when-settled rAF),
   `addPointerDrag`, `AudioSynth` + composable `soundRecipes` (tick/clack/
@@ -89,7 +89,7 @@ record.
   `TiltSlider` rAF/onChange/instance-API tests) and a GitHub Actions CI workflow.
 - `winky-wonky-react` test suite (Vitest + `@testing-library/react`), including a
   controlled-component render test.
-- Package READMEs for `@winky/core` and `winky-wonky-react`; engine-first main
+- Package READMEs for `@winkywonky/core` and `winky-wonky-react`; engine-first main
   README with 1.x → 2.0 migration notes; `docs/ARCHITECTURE.md` rewritten to
   the post-refactor two-layer architecture.
 

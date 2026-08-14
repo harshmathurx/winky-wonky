@@ -13,7 +13,7 @@
 │  winky-wonky           24 components: DOM + ARIA +   │
 │  (packages/winky-wonky) CSS + core primitives        │
 ├─────────────────────────────────────────────────────┤
-│  @winky/core           springs · gestures · audio ·  │
+│  @winkywonky/core           springs · gestures · audio ·  │
 │  (packages/winky-core) media helpers (headless)      │
 └─────────────────────────────────────────────────────┘
 ```
@@ -22,7 +22,7 @@ npm workspaces monorepo; single root lockfile; `npm run test:all` runs every
 package's vitest suite. CI (`.github/workflows/ci.yml`) runs install, tests,
 both builds, and type generation on push/PR.
 
-## `@winky/core` — the engine
+## `@winkywonky/core` — the engine
 
 - **`spring.js`** — one damped-harmonic-oscillator implementation
   (`createSpring`), advanced via the closed-form solution (unconditionally
@@ -51,11 +51,11 @@ guarded lazy init everywhere. `sideEffects: false`, tree-shakeable.
 - **Core adoption:** `TiltSlider` is fully rebuilt on `createSpring` +
   core gestures/audio (the flagship proof). The remaining components consume
   the core through compatibility shims — `src/components/utils.js` and
-  `src/components/audioSynth.js` re-export from `@winky/core` — pending the
+  `src/components/audioSynth.js` re-export from `@winkywonky/core` — pending the
   owner's keep-vs-recipes decision (PLAN.md Phase 5 annotation).
 - **Shared component utils** (`src/components/utils.js`): `setAria` batch
   attribute setter, `makeFocusable`, `onKeyActivation` (Enter/Space),
-  `trapFocus` for modals — plus the `@winky/core` re-exports.
+  `trapFocus` for modals — plus the `@winkywonky/core` re-exports.
 - **CSS:** split per component under `src/styles/`, aggregated by
   `src/winky-wonky.css` (the published `winky-wonky/style.css` export). All
   shipped class names are `winky-`-prefixed; all theme tokens are `--winky-*`

@@ -1,8 +1,8 @@
 // The physics-agnostic pieces that used to live here — the gesture layer
 // (`addPointerDrag`) and the a11y/media helpers (`prefersReducedMotion` and
-// friends) — moved to `@winky/core` in Phase 5 (see docs/AUDIT.md Part 2).
+// friends) — moved to `@winkywonky/core` in Phase 5 (see docs/AUDIT.md Part 2).
 // Re-exported from here so every one of the 19 not-yet-migrated components'
-// `import { ... } from './utils.js'` keeps working unchanged — `@winky/core`
+// `import { ... } from './utils.js'` keeps working unchanged — `@winkywonky/core`
 // is the single source of truth, this is just a stable local alias.
 export {
   addPointerDrag,
@@ -14,12 +14,12 @@ export {
   onReducedMotionChange,
   onReducedSoundChange,
   onPointerTypeChange,
-} from '@winky/core';
+} from '@winkywonky/core';
 
 /**
  * DOM/ARIA helpers that are specific to wiring up winky-wonky's own
  * components (not part of the headless engine) — these stay here rather
- * than moving to `@winky/core`.
+ * than moving to `@winkywonky/core`.
  */
 
 export function setAria(el, attrs) {

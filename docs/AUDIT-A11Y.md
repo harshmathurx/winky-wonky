@@ -81,7 +81,7 @@ should be `role="status"` / `aria-live="polite"`.
 fallback — the keyboard path is solid, but native HTML5 DnD doesn't fire on
 touch devices in most mobile browsers, and there's no touch-drag or
 explicit move-up/move-down button fallback. Fixing this properly means
-swapping to `@winky/core`'s pointer-gesture primitives (`addPointerDrag`)
+swapping to `@winkywonky/core`'s pointer-gesture primitives (`addPointerDrag`)
 for the drag path, which is a larger, riskier change than the rest of this
 audit — flagged for a follow-up rather than patched here.
 
