@@ -1,6 +1,6 @@
 {
   "name": "@winkywonky/core",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0",
   "description": "Headless physics engine for winky-wonky: one spring/damper implementation, pointer-drag gestures, synthesized UI audio, and prefers-reduced-motion/-sound/pointer helpers. Zero dependencies, SSR-safe, framework-agnostic.",
   "type": "module",
   "license": "MIT",
