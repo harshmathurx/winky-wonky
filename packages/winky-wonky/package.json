@@ -1,6 +1,6 @@
 {
   "name": "winky-wonky",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0",
   "description": "A whimsical, physics-based, audio-synthesized design system inspired by Wes Anderson and Tim Burton. Wobbly buttons, seesaw sliders, pendulum toggles, slingshot uploads, and more.",
   "type": "module",
   "license": "MIT",
