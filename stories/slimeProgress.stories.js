@@ -1,4 +1,4 @@
-import { createSlimeProgress } from '../src/components/slimeProgress.js';
+import { createSlimeProgress } from '../packages/winky-wonky/src/components/slimeProgress.js';
 import { mount } from './utils/mount.js';
 
 export default {

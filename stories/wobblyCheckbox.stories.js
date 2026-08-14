@@ -1,4 +1,4 @@
-import { createWobblyCheckbox } from '../src/components/wobblyCheckbox.js';
+import { createWobblyCheckbox } from '../packages/winky-wonky/src/components/wobblyCheckbox.js';
 import { mount } from './utils/mount.js';
 
 export default {

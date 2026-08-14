@@ -571,8 +571,8 @@ Every wrapper component accepts the same options as its vanilla-JS factory, plus
 
 ```
 packages/winky-core/        @winky/core — the engine (springs, gestures, audio, media helpers)
-packages/winky-wonky/       winky-wonky — the component library (24 components)
 packages/winky-wonky-react/ React wrappers (compiled, controlled-component support)
+src/                         winky-wonky — the component library
 .storybook/, stories/        component gallery/docs (never published) — `npm run storybook`
 docs/                        vision, audit, architecture, GTM
 ```

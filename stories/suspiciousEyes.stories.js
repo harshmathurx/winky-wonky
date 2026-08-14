@@ -1,4 +1,4 @@
-import { createSuspiciousEyes } from '../src/components/suspiciousEyes.js';
+import { createSuspiciousEyes } from '../packages/winky-wonky/src/components/suspiciousEyes.js';
 import { mount } from './utils/mount.js';
 
 export default {

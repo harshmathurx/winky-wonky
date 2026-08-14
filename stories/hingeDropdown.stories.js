@@ -1,4 +1,4 @@
-import { createHingeDropdown } from '../src/components/hingeDropdown.js';
+import { createHingeDropdown } from '../packages/winky-wonky/src/components/hingeDropdown.js';
 import { mount } from './utils/mount.js';
 
 export default {

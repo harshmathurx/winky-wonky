@@ -1,4 +1,4 @@
-import { createSlingshotUpload } from '../src/components/slingshotUpload.js';
+import { createSlingshotUpload } from '../packages/winky-wonky/src/components/slingshotUpload.js';
 import { mount } from './utils/mount.js';
 
 export default {

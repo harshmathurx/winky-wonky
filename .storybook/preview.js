@@ -1,4 +1,4 @@
-import '../src/winky-wonky.css';
+import '../packages/winky-wonky/src/winky-wonky.css';
 import './preview.css';
 import { withThemeByDataAttribute } from '@storybook/addon-themes';
 

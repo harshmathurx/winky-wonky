@@ -1,4 +1,4 @@
-import { createGravityToast } from '../src/components/gravityToast.js';
+import { createGravityToast } from '../packages/winky-wonky/src/components/gravityToast.js';
 import { mount } from './utils/mount.js';
 
 export default {

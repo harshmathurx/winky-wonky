@@ -1,0 +1,80 @@
+{
+  "name": "winky-wonky",
+  "version": "2.0.0-alpha.0",
+  "description": "A whimsical, physics-based, audio-synthesized design system inspired by Wes Anderson and Tim Burton. Wobbly buttons, seesaw sliders, pendulum toggles, slingshot uploads, and more.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Harsh Mathur <harshmathurx@gmail.com>",
+  "homepage": "https://github.com/harshmathurx/winky-wonky",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshmathurx/winky-wonky.git",
+    "directory": "packages/winky-wonky"
+  },
+  "bugs": {
+    "url": "https://github.com/harshmathurx/winky-wonky/issues"
+  },
+  "keywords": [
+    "design-system",
+    "ui-components",
+    "physics",
+    "wobbly",
+    "web-audio",
+    "animation",
+    "wes-anderson",
+    "tim-burton",
+    "vanilla-js",
+    "framework-agnostic",
+    "accessible",
+    "interactive"
+  ],
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./dist/types/index.d.ts",
+  "unpkg": "./dist/winky-wonky.min.js",
+  "jsdelivr": "./dist/winky-wonky.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./style.css": "./src/winky-wonky.css",
+    "./dist/*": "./dist/*",
+    "./components/*": "./src/components/*"
+  },
+  "files": [
+    "src/index.js",
+    "src/winky-wonky.css",
+    "src/styles",
+    "src/components",
+    "dist/winky-wonky.min.js",
+    "dist/winky-wonky.es.js",
+    "dist/winky-wonky.css",
+    "dist/styles",
+    "dist/types",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build:lib": "vite build --config vite.lib.config.js",
+    "types": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build:lib && npm run types",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@winky/core": "^2.0.0-alpha.0"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.10"
+  }
+}

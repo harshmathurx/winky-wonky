@@ -1,4 +1,4 @@
-import { createRotaryColorPicker } from '../src/components/rotaryColorPicker.js';
+import { createRotaryColorPicker } from '../packages/winky-wonky/src/components/rotaryColorPicker.js';
 import { mount } from './utils/mount.js';
 
 export default {

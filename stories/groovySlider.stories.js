@@ -1,4 +1,4 @@
-import { createGroovySlider } from '../src/components/groovySlider.js';
+import { createGroovySlider } from '../packages/winky-wonky/src/components/groovySlider.js';
 import { mount } from './utils/mount.js';
 
 export default {
