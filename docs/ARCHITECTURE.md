@@ -77,16 +77,17 @@ guarded lazy init everywhere. `sideEffects: false`, tree-shakeable.
 - `[data-theme="burton"]` = Tim Burton preset
 - All tokens use the `--winky-*` prefix.
 
-## The playground (never published)
+## Storybook (never published)
 
-`index.html` + `src/main.js` + `src/playground/` — the demo site. Component
-tuning knobs and code snippets live in `src/playground/registry.js` (keyed by
-factory function), NOT on the components themselves. Playground-only styles
-are in `src/playground/playground.css`.
+`.storybook/` + `stories/` — the component gallery/docs (`npm run
+storybook`). One `*.stories.js` file per component, with `argTypes` driving
+live Controls; none of this ships in the library. The pre-2.0 custom
+playground (`src/playground/`, `index.html`) served the same purpose and was
+removed in favor of Storybook.
 
 ## Builds
 
-- `npm run build` — playground site (Vite).
+- `npm run build-storybook` — static Storybook site.
 - `npm run build:lib` — library IIFE bundle (`dist/winky-wonky.min.js`, for
   CDN `<script>` use) + ES module + CSS. The copy-css step ships both
   `winky-wonky.css` and `src/styles/` together (the aggregate uses relative

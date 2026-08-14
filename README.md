@@ -20,6 +20,13 @@ spring.target(80); // rAF loop runs only while moving — zero idle CPU
 
 **Zero dependencies. 100% vanilla JS. Fully accessible. SSR-safe.**
 
+Browse every component live — with tunable Controls and a theme switcher
+(Dark / Wes Anderson / Tim Burton) — by cloning the repo and running:
+
+```bash
+npm install && npm run storybook
+```
+
 ---
 
 ## Installation
@@ -565,12 +572,20 @@ Every wrapper component accepts the same options as its vanilla-JS factory, plus
 ```
 packages/winky-core/        @winky/core — the engine (springs, gestures, audio, media helpers)
 packages/winky-wonky-react/ React wrappers (compiled, controlled-component support)
-src/                        winky-wonky — the component library
-src/playground/             demo-site-only code (never published)
-docs/                       vision, audit, architecture, GTM
+src/                         winky-wonky — the component library
+.storybook/, stories/        component gallery/docs (never published) — `npm run storybook`
+docs/                        vision, audit, architecture, GTM
 ```
 
 npm workspaces: `npm install` at the root sets up everything; `npm run test:all` runs every package's suite.
+
+---
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for dev setup and the release
+process (versioning is automated via [Changesets](https://github.com/changesets/changesets)
+on merge to `main`).
 
 ---
 
