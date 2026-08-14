@@ -1,8 +1,5 @@
 /* ==========================================
    ACCESSIBILITY: REDUCED MOTION & POINTER (component styles)
-   Playground-only reduced-motion rules (the global `*` reset, hero/theme
-   elements) live in src/playground/playground.css, not here — this file
-   ships with the library.
    ========================================== */
 
 @media (prefers-reduced-motion: reduce) {

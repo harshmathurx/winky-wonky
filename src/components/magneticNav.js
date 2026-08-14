@@ -57,7 +57,6 @@ export function createMagneticNav(options = {}) {
 
     const link = document.createElement('button');
     link.className = 'winky-magnetic-nav-link winky-focus-visible';
-    link.setAttribute('role', 'menuitem');
     link.setAttribute('aria-current', index === activeIndex ? 'page' : 'false');
     link.textContent = label;
     link.tabIndex = 0;

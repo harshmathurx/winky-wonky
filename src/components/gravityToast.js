@@ -34,6 +34,12 @@ export function createGravityToast(options = {}) {
   triggerBtn.textContent = options.buttonText ?? 'Show Toast';
   container.appendChild(triggerBtn);
 
+  // Fixed-position so the toast stack's growing/shrinking height never
+  // reflows the trigger button (or anything else in normal document flow).
+  const toastStack = document.createElement('div');
+  toastStack.className = 'winky-gravity-toast-stack';
+  container.appendChild(toastStack);
+
   let toastCounter = 0;
   const config = {
     maxVisible: options.maxVisible ?? 3,
@@ -55,8 +61,8 @@ export function createGravityToast(options = {}) {
 
     const toast = document.createElement('div');
     toast.className = 'winky-gravity-toast';
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
 
     const msg = document.createElement('span');
     msg.className = 'winky-gravity-toast-message';
@@ -84,7 +90,7 @@ export function createGravityToast(options = {}) {
 
     closeBtn.addEventListener('click', () => removeToast(toast));
 
-    container.appendChild(toast);
+    toastStack.appendChild(toast);
 
     const timer = setTimeout(() => removeToast(toast), config.duration);
     toastTimers.set(toast, timer);

@@ -29,6 +29,7 @@ export function createGrumpyModalTrigger(options = {}) {
   triggerBtn.className = 'winky-mischievous-btn winky-focus-visible';
   triggerBtn.textContent = 'Trigger Modal';
   triggerBtn.style.backgroundColor = 'var(--winky-accent-alt)';
+  triggerBtn.style.color = 'var(--winky-accent-alt-fill-text)';
   triggerBtn.setAttribute('aria-haspopup', 'dialog');
 
   const headerText = options.headerText ?? 'Peculiar Notice!';
@@ -39,19 +40,6 @@ export function createGrumpyModalTrigger(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'winky-modal-overlay';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100vw';
-  overlay.style.height = '100vh';
-  overlay.style.backgroundColor = 'rgba(43, 37, 32, 0.7)';
-  overlay.style.display = 'flex';
-  overlay.style.justifyContent = 'center';
-  overlay.style.alignItems = 'center';
-  overlay.style.zIndex = '1000';
-  overlay.style.opacity = '0';
-  overlay.style.pointerEvents = 'none';
-  overlay.style.transition = 'opacity 0.3s';
   overlay.setAttribute('role', 'presentation');
 
   const box = document.createElement('div');

@@ -12,7 +12,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   background: var(--winky-accent-color);
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
   border: none;
   border-radius: var(--winky-border-radius-sm);
   cursor: pointer;
@@ -23,6 +23,7 @@
 
 .winky-ripple-btn:hover {
   background: var(--winky-accent-alt);
+  color: var(--winky-accent-alt-fill-text);
 }
 
 .winky-ripple-btn:active {

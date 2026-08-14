@@ -54,7 +54,6 @@ export function createRotaryColorPicker(options = {}) {
 
   const wheel = document.createElement('div');
   wheel.className = 'winky-rotary-wheel';
-  wheel.setAttribute('aria-hidden', 'true');
   outer.appendChild(wheel);
   container.appendChild(outer);
 
@@ -138,8 +137,8 @@ export function createRotaryColorPicker(options = {}) {
     const rad = angle * Math.PI / 180;
 
     const distance = 54;
-    const x = 80 + Math.cos(rad) * distance;
-    const y = 80 + Math.sin(rad) * distance;
+    const x = 70 + Math.cos(rad) * distance;
+    const y = 70 + Math.sin(rad) * distance;
 
     const hole = document.createElement('div');
     hole.className = 'winky-rotary-hole winky-focus-visible';

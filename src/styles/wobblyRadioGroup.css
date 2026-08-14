@@ -36,7 +36,7 @@
 }
 
 .winky-wobbly-radio-item.winky-selected {
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
 }
 
 .winky-wobbly-radio-item:hover:not(.winky-selected) {

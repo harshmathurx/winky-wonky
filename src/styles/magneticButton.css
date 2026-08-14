@@ -14,7 +14,7 @@
   border: var(--winky-border-style);
   border-radius: var(--winky-border-radius-sm);
   background: var(--winky-accent-color);
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
   font-family: var(--winky-font-sans);
   font-weight: 600;
   font-size: 0.875rem;

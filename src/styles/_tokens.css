@@ -12,6 +12,12 @@
   --winky-accent-glow: rgba(99, 102, 241, 0.3);
   --winky-accent-alt: #8B5CF6;
   --winky-accent-teal: #2DD4BF;
+  /* AA-safe (>=4.5:1) text variants of the accent colors — use these for
+     `color:` declarations only. Decorative fills/borders/glows keep using
+     --winky-accent-color / --winky-accent-alt directly. */
+  --winky-accent-color-text: #7A7DF3; /* accent-color as text on --winky-bg-primary: 5.70:1 */
+  --winky-accent-color-fill-text: #000000; /* text sat on an accent-color fill: 4.70:1 */
+  --winky-accent-alt-fill-text: #000000; /* text sat on an accent-alt fill: 4.96:1 */
   --winky-text-primary: #F4F4F8;
   --winky-text-secondary: #9494A8;
   --winky-text-muted: #5A5A6E;
@@ -50,6 +56,9 @@
   --winky-accent-glow: rgba(216, 160, 53, 0.25);
   --winky-accent-alt: #E5A9A9;
   --winky-accent-teal: #7DB3B3;
+  --winky-accent-color-text: #826020; /* accent-color as text on --winky-bg-primary (light theme): 5.36:1 */
+  --winky-accent-color-fill-text: #2B2520; /* text on an accent-color fill: 6.48:1 */
+  --winky-accent-alt-fill-text: #2B2520; /* text on an accent-alt fill: 7.62:1 */
   --winky-text-primary: #2B2520;
   --winky-text-secondary: #6B6356;
   --winky-text-muted: #9A9082;
@@ -72,6 +81,9 @@
   --winky-accent-glow: rgba(243, 127, 48, 0.3);
   --winky-accent-alt: #7B3E8C;
   --winky-accent-teal: #496F5E;
+  --winky-accent-color-text: #F37F30; /* accent-color as text on --winky-bg-primary: 7.31:1, already AA-safe */
+  --winky-accent-color-fill-text: #0D0C13; /* text on an accent-color fill: 7.31:1 */
+  --winky-accent-alt-fill-text: #ECE9F2; /* text on an accent-alt fill (darker hue): 6.02:1 */
   --winky-text-primary: #ECE9F2;
   --winky-text-secondary: #A09EB0;
   --winky-text-muted: #5A576E;

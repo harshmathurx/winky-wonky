@@ -44,6 +44,6 @@
 }
 
 .winky-magnetic-nav-link[aria-current="page"] {
-  color: var(--winky-accent-color);
+  color: var(--winky-accent-color-text);
 }
 

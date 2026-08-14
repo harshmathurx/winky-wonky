@@ -41,7 +41,7 @@
 }
 
 .winky-springy-tab[aria-selected="true"] {
-  color: var(--winky-accent-color);
+  color: var(--winky-accent-color-text);
 }
 
 .winky-springy-tab-panel {

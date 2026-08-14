@@ -5,7 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(43, 37, 32, 0.7);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -81,12 +81,13 @@
 
 .winky-modal-btn-close {
   background: var(--winky-accent-color);
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
   border-color: transparent;
 }
 
 .winky-modal-btn-close:hover {
   background: var(--winky-accent-alt);
+  color: var(--winky-accent-alt-fill-text);
 }
 
 @keyframes winky-grumpy-shake {

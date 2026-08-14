@@ -55,7 +55,7 @@
 
 .winky-rotary-hole:hover {
   background: var(--winky-accent-color);
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
   border-color: var(--winky-accent-color);
 }
 

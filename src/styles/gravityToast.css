@@ -13,7 +13,7 @@
   font-size: 0.825rem;
   font-weight: 600;
   background: var(--winky-accent-color);
-  color: #fff;
+  color: var(--winky-accent-color-fill-text);
   border: none;
   border-radius: var(--winky-border-radius-sm);
   cursor: pointer;
@@ -23,10 +23,23 @@
 
 .winky-gravity-toast-trigger:hover {
   background: var(--winky-accent-alt);
+  color: var(--winky-accent-alt-fill-text);
 }
 
 .winky-gravity-toast-trigger:active {
   transform: scale(0.97);
+}
+
+.winky-gravity-toast-stack {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .winky-gravity-toast {
@@ -39,9 +52,9 @@
   border: var(--winky-border-style-strong);
   border-radius: var(--winky-border-radius-sm);
   padding: 0.6rem 0.9rem;
-  margin-top: 0.5rem;
   width: 260px;
   box-shadow: var(--winky-box-shadow);
+  pointer-events: auto;
   transition: transform 0.3s var(--winky-gentle-spring), opacity 0.3s;
 }
 
