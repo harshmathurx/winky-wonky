@@ -1,4 +1,4 @@
-import { createWobblySwitch } from '../src/components/wobblySwitch.js';
+import { createWobblySwitch } from '../packages/winky-wonky/src/components/wobblySwitch.js';
 import { mount } from './utils/mount.js';
 
 export default {

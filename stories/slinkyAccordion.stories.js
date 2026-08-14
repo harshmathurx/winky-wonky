@@ -1,4 +1,4 @@
-import { createSlinkyAccordion } from '../src/components/slinkyAccordion.js';
+import { createSlinkyAccordion } from '../packages/winky-wonky/src/components/slinkyAccordion.js';
 import { mount } from './utils/mount.js';
 
 export default {

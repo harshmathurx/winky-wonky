@@ -11,7 +11,7 @@
 │  (packages/…-react)    `value` prop → setValue()     │
 ├─────────────────────────────────────────────────────┤
 │  winky-wonky           24 components: DOM + ARIA +   │
-│  (src/)                CSS + core primitives         │
+│  (packages/winky-wonky) CSS + core primitives        │
 ├─────────────────────────────────────────────────────┤
 │  @winky/core           springs · gestures · audio ·  │
 │  (packages/winky-core) media helpers (headless)      │
@@ -82,16 +82,16 @@ guarded lazy init everywhere. `sideEffects: false`, tree-shakeable.
 `.storybook/` + `stories/` — the component gallery/docs (`npm run
 storybook`). One `*.stories.js` file per component, with `argTypes` driving
 live Controls; none of this ships in the library. The pre-2.0 custom
-playground (`src/playground/`, `index.html`) served the same purpose and was
-removed in favor of Storybook.
+playground (formerly `src/playground/`, `index.html`) served the same
+purpose and was removed in favor of Storybook.
 
 ## Builds
 
-- `npm run build-storybook` — static Storybook site.
-- `npm run build:lib` — library IIFE bundle (`dist/winky-wonky.min.js`, for
-  CDN `<script>` use) + ES module + CSS. The copy-css step ships both
-  `winky-wonky.css` and `src/styles/` together (the aggregate uses relative
-  `@import`s — they must travel as a pair).
+- `npm run build-storybook` (root) — static Storybook site.
+- `npm run build:lib --workspace=winky-wonky` — library IIFE bundle
+  (`dist/winky-wonky.min.js`, for CDN `<script>` use) + ES module + CSS. The
+  copy-css step ships both `winky-wonky.css` and `src/styles/` together (the
+  aggregate uses relative `@import`s — they must travel as a pair).
 - `packages/winky-wonky-react`: Vite lib mode → compiled ESM `dist/index.js`
   (no raw JSX is ever published); react/react-dom/winky-wonky stay external
   as peers.

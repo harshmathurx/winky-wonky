@@ -1,4 +1,4 @@
-import { createElasticDragList } from '../src/components/elasticDragList.js';
+import { createElasticDragList } from '../packages/winky-wonky/src/components/elasticDragList.js';
 import { mount } from './utils/mount.js';
 
 export default {

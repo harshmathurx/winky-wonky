@@ -1,4 +1,4 @@
-import { createTiltSlider } from '../src/components/tiltSlider.js';
+import { createTiltSlider } from '../packages/winky-wonky/src/components/tiltSlider.js';
 import { mount } from './utils/mount.js';
 
 export default {

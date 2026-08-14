@@ -1,4 +1,4 @@
-import { createPendulumToggle } from '../src/components/pendulumToggle.js';
+import { createPendulumToggle } from '../packages/winky-wonky/src/components/pendulumToggle.js';
 import { mount } from './utils/mount.js';
 
 export default {

@@ -1,4 +1,4 @@
-import { createRatingStars } from '../src/components/ratingStars.js';
+import { createRatingStars } from '../packages/winky-wonky/src/components/ratingStars.js';
 import { mount } from './utils/mount.js';
 
 export default {

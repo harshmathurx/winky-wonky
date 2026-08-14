@@ -1,4 +1,4 @@
-import { createSpringyTabs } from '../src/components/springyTabs.js';
+import { createSpringyTabs } from '../packages/winky-wonky/src/components/springyTabs.js';
 import { mount } from './utils/mount.js';
 
 export default {

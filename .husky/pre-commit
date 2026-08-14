@@ -1,1 +1,1 @@
-npm run build:lib && npm run types && npm run build-storybook
+npm run build:lib --workspace=winky-wonky && npm run types --workspace=winky-wonky && npm run build-storybook

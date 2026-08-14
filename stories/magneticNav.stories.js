@@ -1,4 +1,4 @@
-import { createMagneticNav } from '../src/components/magneticNav.js';
+import { createMagneticNav } from '../packages/winky-wonky/src/components/magneticNav.js';
 import { mount } from './utils/mount.js';
 
 export default {

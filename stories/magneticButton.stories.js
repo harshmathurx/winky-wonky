@@ -1,4 +1,4 @@
-import { createMagneticButton } from '../src/components/magneticButton.js';
+import { createMagneticButton } from '../packages/winky-wonky/src/components/magneticButton.js';
 import { mount } from './utils/mount.js';
 
 export default {

@@ -1,4 +1,4 @@
-import { createTypewriterInput } from '../src/components/typewriterInput.js';
+import { createTypewriterInput } from '../packages/winky-wonky/src/components/typewriterInput.js';
 import { mount } from './utils/mount.js';
 
 export default {

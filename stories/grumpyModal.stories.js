@@ -1,4 +1,4 @@
-import { createGrumpyModalTrigger } from '../src/components/grumpyModal.js';
+import { createGrumpyModalTrigger } from '../packages/winky-wonky/src/components/grumpyModal.js';
 import { mount } from './utils/mount.js';
 
 export default {

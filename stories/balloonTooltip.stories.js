@@ -1,4 +1,4 @@
-import { createBalloonTooltip } from '../src/components/balloonTooltip.js';
+import { createBalloonTooltip } from '../packages/winky-wonky/src/components/balloonTooltip.js';
 import { mount } from './utils/mount.js';
 
 export default {

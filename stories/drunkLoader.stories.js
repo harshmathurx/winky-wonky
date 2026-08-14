@@ -1,4 +1,4 @@
-import { createDrunkLoader } from '../src/components/drunkLoader.js';
+import { createDrunkLoader } from '../packages/winky-wonky/src/components/drunkLoader.js';
 import { mount } from './utils/mount.js';
 
 export default {

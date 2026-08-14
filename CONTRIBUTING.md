@@ -5,14 +5,15 @@
 ```bash
 npm install
 npm run storybook   # component gallery + docs, http://localhost:6006
-npm test            # vitest, root + every workspace package
+npm run test:all    # vitest, every workspace package
 ```
 
 ## Repo layout
 
-npm workspaces monorepo, three published packages:
+npm workspaces monorepo. The root package.json is private/unpublished
+tooling only — the three published packages live under `packages/`:
 
-- `winky-wonky` (root) — the 24 vanilla-JS components (`src/`)
+- `winky-wonky` (`packages/winky-wonky`) — the 24 vanilla-JS components
 - `@winky/core` (`packages/winky-core`) — the headless physics/gesture/audio engine
 - `winky-wonky-react` (`packages/winky-wonky-react`) — controlled React wrappers
 

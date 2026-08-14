@@ -1,4 +1,4 @@
-import { createRippleButton } from '../src/components/rippleButton.js';
+import { createRippleButton } from '../packages/winky-wonky/src/components/rippleButton.js';
 import { mount } from './utils/mount.js';
 
 export default {

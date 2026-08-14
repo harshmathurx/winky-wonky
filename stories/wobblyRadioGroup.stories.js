@@ -1,4 +1,4 @@
-import { createWobblyRadioGroup } from '../src/components/wobblyRadioGroup.js';
+import { createWobblyRadioGroup } from '../packages/winky-wonky/src/components/wobblyRadioGroup.js';
 import { mount } from './utils/mount.js';
 
 export default {
