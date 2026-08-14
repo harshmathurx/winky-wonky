@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0
+
+### Patch Changes
+
+- [#1](https://github.com/harshmathurx/winky-wonky/pull/1) [`8900254`](https://github.com/harshmathurx/winky-wonky/commit/8900254e38c9a035c0d0558bbed8abf85ee994f3) Thanks [@harshmathurx](https://github.com/harshmathurx)! - Fix accessibility issues found in an audit: Rotary Color Picker no longer hides its focusable palette holes from assistive tech via a stray `aria-hidden`; Magnetic Nav no longer sets an invalid `role="menuitem"` without a `menu`/`menubar` ancestor; Gravity Toast now announces via `role="status"`/`aria-live="polite"` instead of interrupting with `assertive`/`alert` for routine messages; and text-on-accent-color contrast across Gravity Toast, Ripple Button, Grumpy Modal, Magnetic Button, Magnetic Nav, Pendulum Toggle, Springy Tabs, Wobbly Radio Group, and Rotary Color Picker now meets WCAG AA (4.5:1) in all three built-in themes via new `--winky-accent-color-text`/`--winky-accent-color-fill-text`/`--winky-accent-alt-fill-text` tokens.
+
+- [#1](https://github.com/harshmathurx/winky-wonky/pull/1) [`8900254`](https://github.com/harshmathurx/winky-wonky/commit/8900254e38c9a035c0d0558bbed8abf85ee994f3) Thanks [@harshmathurx](https://github.com/harshmathurx)! - Fix functional bugs found in a manual UAT pass: Grumpy Modal's trigger button did nothing (inline styles set in JS were permanently overriding the CSS class that opened it); Gravity Toast could visually shift the trigger button around the page as toasts stacked up (toasts are now a fixed-position stack, out of normal document flow); and Rotary Color Picker's dial holes rendered partly outside the dial's circle (a hardcoded center offset didn't match the dial's actual CSS size).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
