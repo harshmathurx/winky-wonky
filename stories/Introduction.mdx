@@ -1,0 +1,53 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+<div className="wonky-intro">
+
+# Winky Wonky
+
+A whimsical, physics-based, audio-synthesized design system — Wes Anderson's
+symmetry meets Tim Burton's tilt. Every component is a real spring/damper
+simulation, not a CSS transition pretending to be one.
+
+```bash
+npm install winky-wonky
+```
+
+```js
+import { createWobblySwitch } from 'winky-wonky';
+import 'winky-wonky/style.css';
+
+const sw = createWobblySwitch({ labelText: 'Enable Physics' });
+document.body.appendChild(sw.el);
+```
+
+### What's here
+
+Every component in the left sidebar is live — drag it, click it, tab through
+it. Use the **Controls** panel below each canvas to tune spring power,
+labels, and other options in real time; use the theme switcher in the
+toolbar above to flip between the **Dark**, **Wes Anderson**, and
+**Tim Burton** presets, all driven by the same `data-theme` attribute your
+own app would set.
+
+### Packages
+
+| Package | What it is |
+| --- | --- |
+| `winky-wonky` | The 24 components — vanilla JS, framework-agnostic, `createX(options)` factories |
+| `@winky/core` | The headless engine underneath: spring physics, pointer-drag gestures, synthesized audio, `prefers-reduced-motion`/`-sound` helpers |
+| `winky-wonky-react` | Thin, controlled React wrappers over the same components |
+
+### Links
+
+- [GitHub](https://github.com/harshmathurx/winky-wonky)
+- [npm](https://www.npmjs.com/package/winky-wonky)
+
+</div>
+
+<style>{`
+  .wonky-intro { max-width: 720px; }
+  .wonky-intro table { width: 100%; border-collapse: collapse; }
+  .wonky-intro th, .wonky-intro td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+`}</style>

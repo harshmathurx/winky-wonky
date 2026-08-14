@@ -5,14 +5,8 @@ node_modules
 .vscode
 .idea
 .DS_Store
-examples
 docs
-index.html
-public
+stories
+.storybook
+storybook-static
 vite.lib.config.js
-src/main.js
-src/assets
-dist/assets
-dist/favicon.svg
-dist/icons.svg
-dist/index.html

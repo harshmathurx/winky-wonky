@@ -15,5 +15,5 @@
     "noEmitOnError": true
   },
   "include": ["src/index.js", "src/components/**/*.js"],
-  "exclude": ["node_modules", "dist", "src/main.js", "src/playground/**"]
+  "exclude": ["node_modules", "dist"]
 }

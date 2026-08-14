@@ -23,14 +23,14 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build (playground)
-        run: npm run build
-
       - name: Build (library)
         run: npm run build:lib
 
       - name: Generate type declarations
         run: npm run types
+
+      - name: Build (Storybook)
+        run: npm run build-storybook
 
   react-package-build:
     name: Build (winky-wonky-react)
